@@ -16,7 +16,7 @@ from tkinter import *
 # This may be redundant if the only exception it is going to throw is a VALUE ERROR (and I doubt that there will be enougth to justify a procedure)
 def ExceptionHandler(value):
     if value==1:#Value Error
-        Errors.config(text="Value Error: Please enter a number")
+        errorText.config(text="Value Error: Please enter a number")
     
 #Launch function- This is where the calculations will take place as well as makeing the user chose a number.
 def launch(event):
