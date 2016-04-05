@@ -1,2 +1,4 @@
 # Year-13-project-PROTOTYPE (Trajectory grapher)
-This is the prototype of what I want to do for my year 13 project
+This program uses Tkinter and Matplotlib to create a GUI and graph to plot the trajectory of a projectile.
+I did not use any fancy physics, I only used SUVAT equations to get the values.
+
