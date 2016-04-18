@@ -16,10 +16,12 @@ infoLableFont=("TkDefaultFont",10,"bold")
 launchFont=("TkDefaultFont",15,"bold")
 plt.style.use(['ggplot'])
 
+
 #Window information (Window geometry, default bg color and title)
 root = Tk()
 width=root.winfo_screenwidth()/2
 height=root.winfo_screenheight()/2
+resolutionOffset=((100/(1920*1080))*((height*2)*(width*2))/100)
 root.title("Trajectory Grapher")
 root.geometry("%dx%d+%d+%d" %(width,height,width/2,height/2))
 root.config(bg="White")
@@ -33,7 +35,7 @@ inputPos.place(x=width*0.66,y=0)
 
 #This function gets an array of positions so that it can plot this coordinates on to a graph
 def showGraph(xvals,yvals):
-    figure = Figure(figsize=(6.35,5.5), dpi=100) 
+    figure = Figure(figsize=(6.35,5.5), dpi=99*resolutionOffset) 
     graph = figure.add_subplot(111)
     graph.plot(xvals,yvals)
     graph.set_xlabel("Horizontal displacement(M)")
