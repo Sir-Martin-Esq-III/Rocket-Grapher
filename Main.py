@@ -22,6 +22,7 @@ root = Tk()
 width=root.winfo_screenwidth()/2
 height=root.winfo_screenheight()/2
 resolutionOffset=((100/(1920*1080))*((height*2)*(width*2))/100)
+print(resolutionOffset)
 root.title("Trajectory Grapher")
 root.geometry("%dx%d+%d+%d" %(width,height,width/2,height/2))
 root.config(bg="White")
@@ -35,7 +36,7 @@ inputPos.place(x=width*0.66,y=0)
 
 #This function gets an array of positions so that it can plot this coordinates on to a graph
 def showGraph(xvals,yvals):
-    figure = Figure(figsize=(6.35,5.5), dpi=99*resolutionOffset) 
+    figure = Figure(figsize=(((6.35*resolutionOffset)+0.5),5.1), dpi=99) 
     graph = figure.add_subplot(111)
     graph.plot(xvals,yvals)
     graph.set_xlabel("Horizontal displacement(M)")
@@ -93,8 +94,8 @@ def launch(event):
             print("Launch angle:",launchAngle,"Resultant velocity:",resultantVelocity)
             maxHeight,horizDisp,time=maths(launchAngle,resultantVelocity)
             vDisplacement.set("Max height (M):  %s" %float('%.3g' %maxHeight))
-            hDisplacement.set("Horizontal displacement (M): %s" %float('%.3g' %horizDisp))
-            Time.set("Time in air (S):  %s" %float('%.3g' %time))
+            hDisplacement.set("ΔDh(M): %s" %float('%.3g' %horizDisp))
+            Time.set("Δt:  %s" %float('%.3g' %time))
 
 
 #These functions clear the Entry widgets
@@ -112,24 +113,24 @@ def clear2(event):
 #Angle information- Creates a lable and an entry box (Which can be cleared) as well as declares the variable for the value of launch velocity
 angleValue=StringVar()
 angleValue.set('Use values > 0')    
-lable_LaunchAngle=Label(inputPos, text="Launch Angle: ",fg ="#8c8c8c",bg ="White",font=MainlableFont)
+lable_LaunchAngle=Label(inputPos, text="Launchº ",fg ="#8c8c8c",bg ="White",font=MainlableFont)
 lable_LaunchAngle.place(x=0,y=50)
 entry_LaunchAngle=Entry(inputPos, textvariable=angleValue,fg ="#E24A33 ",bg ="#E5E5E5",relief=FLAT)
-entry_LaunchAngle.place(x=150,y=57)
+entry_LaunchAngle.place(x=150*resolutionOffset,y=57)
 entry_LaunchAngle.bind("<1>",clear1)
 
 #Launch velocity information- Creates a lable and an entry box (Which can be cleared) as well as declares the variable for the value of launch velocity
 LaunchVel=StringVar()
 LaunchVel.set('Use values > 0')
-lable_LaunchVel=Label(inputPos, text="Resulatant Velocity: ",fg ="#8c8c8c",bg ="White",font=MainlableFont)     
+lable_LaunchVel=Label(inputPos, text="Vr  ",fg ="#8c8c8c",bg ="White",font=MainlableFont)     
 lable_LaunchVel.place(x=2,y=100)
 entry_LaunchVel=Entry(inputPos, textvariable=LaunchVel,fg ="#E24A33 ",bg ="#E5E5E5",relief=FLAT)
-entry_LaunchVel.place(x=200,y=107)
+entry_LaunchVel.place(x=150*resolutionOffset,y=107)
 entry_LaunchVel.bind("<FocusIn>",clear2)
 
 #Launch button- Creates a button which "launches" the rocket (goes to the launch Procedure)
 launchButton=Button(inputPos,text="LAUNCH",fg ="#E24A33 ",relief=FLAT,bg="#E5E5E5",font=MainlableFont)
-launchButton.place(x=100,y=150)
+launchButton.place(x=100*resolutionOffset,y=150)
 launchButton.bind("<1>",launch)
 
 #Errors- Shows any errors to the user.
