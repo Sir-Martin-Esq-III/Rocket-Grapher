@@ -11,9 +11,8 @@ from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 
 #Fonts/Styles
-MainlableFont=("TkDefaultFont",15,"bold")
+MainFont=("TkDefaultFont",15,"bold")
 infoLableFont=("TkDefaultFont",10,"bold")
-launchFont=("TkDefaultFont",15,"bold")
 plt.style.use(['ggplot'])
 
 
@@ -21,11 +20,11 @@ plt.style.use(['ggplot'])
 root = Tk()
 width=root.winfo_screenwidth()/2
 height=root.winfo_screenheight()/2
+print(width,height)
 resolutionOffset=((100/(1920*1080))*((height*2)*(width*2))/100)
 print(resolutionOffset)
 root.title("Trajectory Grapher")
 root.geometry("%dx%d+%d+%d" %(width,height,width/2,height/2))
-root.config(bg="White")
 root.resizable(width=FALSE, height=FALSE)
 
 #Creates 2 frames one for showing the graph and another for the user input.
@@ -51,10 +50,10 @@ def maths(angle,velocity):
     xValues=list()
     yValues=list()
     gravity=9.81
-    #Resolving the vector into v/h components 
+    #Resolving into v/h components 
     verticalComponent=velocity*(sin(radians(angle)))
     horizontalComponent=velocity*(cos(radians(angle)))
-    #Finds Time/max horizontal displacement/ max vertical displacement 
+    #Finds Time,max horizontal displacement, max vertical displacement 
     time=(2*verticalComponent)/gravity
     maxHorizDisp=time*horizontalComponent
     maxVertDisp=(-(verticalComponent**2)/(2*-gravity))
@@ -65,13 +64,13 @@ def maths(angle,velocity):
     showGraph(xValues,yValues)
     return(maxVertDisp,maxHorizDisp,time)
 
-#Error handler- This function is called when an exception has been met or some arbitary rule that I have set has been broken also updates the error labeles to display to the user what they have done wrong.
+#Error handler- Updates error lable text
 def ErrorHandler(value):
     vDisplacement.set("")
     hDisplacement.set("")
     Time.set("")
     if value==1:#Value Error
-        errorText.config(text=" Value Error: Please enter a number")
+        errorText.config(text=" Value Error: Please enter an integer")
     if value==2:#Angle >360
         errorText.config(text=" Angle Value Error: An angle must follow this rule:\n 0<= ANGLE <=180")
     if value==3:#Velocity<0
@@ -93,18 +92,18 @@ def launch(event):
             errorText.config(text="")
             print("Launch angle:",launchAngle,"Resultant velocity:",resultantVelocity)
             maxHeight,horizDisp,time=maths(launchAngle,resultantVelocity)
-            vDisplacement.set("Max height (M):  %s" %float('%.3g' %maxHeight))
-            hDisplacement.set("ΔDh(M): %s" %float('%.3g' %horizDisp))
-            Time.set("Δt:  %s" %float('%.3g' %time))
+            vDisplacement.set("∨Dv(M):%s" %round(maxHeight,3))
+            hDisplacement.set("ΔDh(M):%s" %round(horizDisp,3))
+            Time.set("Δt:%s" %float('%.3g' %time))
 
 
 #These functions clear the Entry widgets
-def clear1(event):
+def clearAngle(event):
         print("Cleared Angle Input")
         angleValue.set("")
         event.widget.config(textvariable=angleValue)
 
-def clear2(event):
+def clearVelocity(event):
     print("Cleared Resultant Velocity Input")
     LaunchVel.set("")
     event.widget.config(textvariable=LaunchVel)
@@ -113,23 +112,23 @@ def clear2(event):
 #Angle information- Creates a lable and an entry box (Which can be cleared) as well as declares the variable for the value of launch velocity
 angleValue=StringVar()
 angleValue.set('Use values > 0')    
-lable_LaunchAngle=Label(inputPos, text="Launchº ",fg ="#8c8c8c",bg ="White",font=MainlableFont)
+lable_LaunchAngle=Label(inputPos, text="θ° ",fg ="#8c8c8c",bg ="White",font=MainFont)
 lable_LaunchAngle.place(x=0,y=50)
 entry_LaunchAngle=Entry(inputPos, textvariable=angleValue,fg ="#E24A33 ",bg ="#E5E5E5",relief=FLAT)
 entry_LaunchAngle.place(x=150*resolutionOffset,y=57)
-entry_LaunchAngle.bind("<1>",clear1)
+entry_LaunchAngle.bind("<1>",clearAngle)
 
 #Launch velocity information- Creates a lable and an entry box (Which can be cleared) as well as declares the variable for the value of launch velocity
 LaunchVel=StringVar()
 LaunchVel.set('Use values > 0')
-lable_LaunchVel=Label(inputPos, text="Vr  ",fg ="#8c8c8c",bg ="White",font=MainlableFont)     
+lable_LaunchVel=Label(inputPos, text="Vr(m/s)  ",fg ="#8c8c8c",bg ="White",font=MainFont)     
 lable_LaunchVel.place(x=2,y=100)
 entry_LaunchVel=Entry(inputPos, textvariable=LaunchVel,fg ="#E24A33 ",bg ="#E5E5E5",relief=FLAT)
 entry_LaunchVel.place(x=150*resolutionOffset,y=107)
-entry_LaunchVel.bind("<FocusIn>",clear2)
+entry_LaunchVel.bind("<FocusIn>",clearVelocity)
 
 #Launch button- Creates a button which "launches" the rocket (goes to the launch Procedure)
-launchButton=Button(inputPos,text="LAUNCH",fg ="#E24A33 ",relief=FLAT,bg="#E5E5E5",font=MainlableFont)
+launchButton=Button(inputPos,text="LAUNCH",fg ="#E24A33 ",relief=FLAT,bg="#E5E5E5",font=MainFont)
 launchButton.place(x=100*resolutionOffset,y=150)
 launchButton.bind("<1>",launch)
 
