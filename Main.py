@@ -1,152 +1,228 @@
 """
+import tkinter as tk   # python3
+#import Tkinter as tk   # python
+TITLE_FONT = ("Helvetica", 18, "bold")
+class SampleApp(tk.Tk):
+    def __init__(self, *args, **kwargs):
+        tk.Tk.__init__(self, *args, **kwargs)
+        # the container is where we'll stack a bunch of frames
+        # on top of each other, then the one we want visible
+        # will be raised above the others
+        container = tk.Frame(self)
+        container.pack(side="top", fill="both", expand=True)
+        container.grid_rowconfigure(0, weight=1)
+        container.grid_columnconfigure(0, weight=1)
+        self.frames = {}
+        for F in (StartPage, PageOne, PageTwo):
+            page_name = F.__name__
+            frame = F(container, self)
+            self.frames[page_name] = frame
+            # put all of the pages in the same location;
+            # the one on the top of the stacking order
+            # will be the one that is visible.
+            frame.grid(row=0, column=0, sticky="nsew")
+        self.show_frame("StartPage")
+    def show_frame(self, page_name):
+        '''Show a frame for the given page name'''
+        frame = self.frames[page_name]
+        frame.tkraise()
+class StartPage(tk.Frame):
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self, parent)
+        self.controller = controller
+        tk.Label = tk.tk.Label(self, text="This is the start page", font=TITLE_FONT)
+        tk.Label.pack(side="top", fill="x", pady=10)
+        button1 = tk.Button(self, text="Go to Page One",
+                            command=lambda: controller.show_frame("PageOne"))
+        button2 = tk.Button(self, text="Go to Page Two",
+                            command=lambda: controller.show_frame("PageTwo"))
+        button1.pack()
+        button2.pack()
+class PageOne(tk.Frame):
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self, parent)
+        self.controller = controller
+        tk.Label = tk.tk.Label(self, text="This is page 1", font=TITLE_FONT)
+        tk.Label.pack(side="top", fill="x", pady=10)
+        button = tk.Button(self, text="Go to the start page",
+                           command=lambda: controller.show_frame("StartPage"))
+        button.pack()
+class PageTwo(tk.Frame):
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self, parent)
+        self.controller = controller
+        tk.Label = tk.tk.Label(self, text="This is page 2", font=TITLE_FONT)
+        tk.Label.pack(side="top", fill="x", pady=10)
+        button = tk.Button(self, text="Go to the start page",
+                           command=lambda: controller.show_frame("StartPage"))
+        button.pack()
+if __name__ == "__main__":
+    app = SampleApp()
+    app.mainloop()
+"""
+
+"""
 This program plots the trajectory of a projectile using the SUVAT equations (That means no fancy physics, unfortunately).
 """
-from tkinter import *
+import tkinter as tk
 from math import *
-#Matplotlib and its backend and other stuff.
-import matplotlib
-matplotlib.use("TkAgg")
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-from matplotlib.figure import Figure
-import matplotlib.pyplot as plt
-
 #Fonts/Styles
 MainFont=("TkDefaultFont",15,"bold")
 infoLableFont=("TkDefaultFont",10,"bold")
-plt.style.use(['ggplot'])
+stagesList=list()
 
 
-#Window information (Window geometry, default bg color and title)
-root = Tk()
-width=root.winfo_screenwidth()/2
-height=root.winfo_screenheight()/2
-print(width,height)
-resolutionOffset=((100/(1920*1080))*((height*2)*(width*2))/100)
-print(resolutionOffset)
-root.title("Trajectory Grapher")
-root.geometry("%dx%d+%d+%d" %(width,height,width/2,height/2))
-root.resizable(width=FALSE, height=FALSE)
+class TrajectoryGrapher(tk.Tk):
+    def __init__(self,*args,**kwargs):
+        #inits tk and other window geomerty
+        tk.Tk.__init__(self,*args,**kwargs)
+        width=self.winfo_screenwidth()/2
+        height=self.winfo_screenheight()/2
+        self.title("Trajectory Grapher")
+        self.geometry("%dx%d+%d+%d" %(width,height,width/2,height/2))
+        self.resizable(False,False)
+        container=tk.Frame(self,bg="#fff")
+        container.pack(side="top",fill="both",expand=True)
+        #Creates a dictonary for all of the frames 
+        self.frames={}
+        for F in (stageingFrame, graphFrame):
+            page_name = F.__name__
+            frame = F(container, self)
+            self.frames[page_name] = frame
 
-#Creates 2 frames one for showing the graph and another for the user input.
-graphPos=Frame(root,height=height,width=width*0.66,bg="White")
-graphPos.place(x=0,y=0)
-inputPos=Frame(root,height=height,width=width*0.33,bg ="White")
-inputPos.place(x=width*0.66,y=0)
+       # frame = stageingFrame(container,self)# Change to graph frame when it is developed
+        frame.grid(row=5,column=0,sticky="nsew")
+        self.showFrame("stageingFrame")
 
-#This function gets an array of positions so that it can plot this coordinates on to a graph
-def showGraph(xvals,yvals):
-    figure = Figure(figsize=(((6.35*resolutionOffset)+0.5),5.1), dpi=99) 
-    graph = figure.add_subplot(111)
-    graph.plot(xvals,yvals)
-    graph.set_xlabel("Horizontal displacement(M)")
-    graph.set_ylabel("Vertical displacement(M)")
-    canvas = FigureCanvasTkAgg(figure, graphPos)
-    canvas.show()
-    canvas.get_tk_widget().place(x=0,y=0)
-
-#Does all of the calculations 
-def maths(angle,velocity):
-#Creates arrays for the x/y coordinates used to plot the graphs as well as defining gravity 
-    xValues=list()
-    yValues=list()
-    gravity=9.81
-    #Resolving into v/h components 
-    verticalComponent=velocity*(sin(radians(angle)))
-    horizontalComponent=velocity*(cos(radians(angle)))
-    #Finds Time,max horizontal displacement, max vertical displacement 
-    time=(2*verticalComponent)/gravity
-    maxHorizDisp=time*horizontalComponent
-    maxVertDisp=(-(verticalComponent**2)/(2*-gravity))
-    for i in range(0,36):
-        updateTime=(time*(i/35))
-        yValues.append((verticalComponent*updateTime)+((-1/2*gravity)*(updateTime*updateTime)))
-        xValues.append(updateTime*horizontalComponent) 
-    showGraph(xValues,yValues)
-    return(maxVertDisp,maxHorizDisp,time)
-
-#Error handler- Updates error lable text
-def ErrorHandler(value):
-    vDisplacement.set("")
-    hDisplacement.set("")
-    Time.set("")
-    if value==1:#Value Error
-        errorText.config(text=" Value Error: Please enter an integer")
-    if value==2:#Angle >360
-        errorText.config(text=" Angle Value Error: An angle must follow this rule:\n 0<= ANGLE <=180")
-    if value==3:#Velocity<0
-        errorText.config(text=" Velocity Value Error: You can't have a negative velocity.")
+    def showFrame(self,page_name):
+        frame = self.frames[page_name]
+        frame.tkraise()
+        
+#Class which has all of the graph information
+class graphFrame(tk.Frame):
+    def __init__(self,parent,controller):
+        tk.Frame.__init__(self,parent)
+        print("hello")
+        
+#Class which has all of help information
+class helpFrame(tk.Frame):
+    def __init__(self,parent,controller):
+        tk.Frame.__init__(self,parent)
+     
+#Class which has all of the stageing information
+#TODO: Add validation to the enrties
+class stageingFrame(tk.Frame):
+    currentStageNumber=0
     
-#Launch function-input validation, updateing lables for Vdisp, hdisp and timer.
-def launch(event):
-    try:
-        launchAngle=int(entry_LaunchAngle.get())
-        resultantVelocity=int(entry_LaunchVel.get())
-    except ValueError:
-        ErrorHandler(1)
-    else:
-        if launchAngle>180 or launchAngle<0:
-            ErrorHandler(2)
-        elif resultantVelocity<0:
-            ErrorHandler(3)         
-        else:
-            errorText.config(text="")
-            print("Launch angle:",launchAngle,"Resultant velocity:",resultantVelocity)
-            maxHeight,horizDisp,time=maths(launchAngle,resultantVelocity)
-            vDisplacement.set("∨Dv(M):%s" %round(maxHeight,3))
-            hDisplacement.set("ΔDh(M):%s" %round(horizDisp,3))
-            Time.set("Δt:%s" %float('%.3g' %time))
+    class Stages:
+        stageNumber=None
+        mass=None
+        angle=None
+        thrust=None
+        amountOfFuel=None
+        burnTime=None
+        def __init__(self,number):
+           self.stageNumber=number
+           print("Last stage added %i" %(self.stageNumber))   
+    if len(stagesList)==0:
+        startStage=Stages(0)
+        stagesList.append(startStage)
 
+    def __init__(self,parent,controller):
+        tk.Frame.__init__(self,parent)
+        #Creates the menu bar   
+        self.controller = controller
+        stageValue=tk.StringVar()
+        stageValue.set("Stage 0")    
+        lable_stageValue=tk.Label(controller, textvariable=stageValue,fg ="#8c8c8c",bg ="White",font=MainFont)
+        lable_stageValue.place(x=(controller.winfo_screenwidth()/4)-22,y=0)
+        
+        #Mass widgets(Lable&Entry)
+        mass=tk.DoubleVar()
+        lable_Mass=tk.Label(controller, text="Mass(KG)",fg ="#8c8c8c",bg ="White",font=MainFont)   
+        lable_Mass.place(y=150)  
+        Entry_Mass=tk.Entry(controller,textvariable=mass, fg ="#E24A33 ",bg ="#E5E5E5",relief=tk.FLAT)
+        Entry_Mass.place(y=200)
+        
+        #Angle widgets(Lable&Entry)
+        angle=tk.DoubleVar()
+        lable_Angle=tk.Label(controller, text="Angle(°)",fg ="#8c8c8c",bg ="White",font=MainFont)     
+        lable_Angle.place(x=(controller.winfo_screenwidth()/4)-22,y=150)
+        Entry_Angle=tk.Entry(controller, textvariable=angle,fg ="#E24A33 ",bg ="#E5E5E5",relief=tk.FLAT)
+        Entry_Angle.place(x=(controller.winfo_screenwidth()/4)-22,y=200)
+        
+        #Fuel widgets(Lable&Entry)
+        fuel=tk.DoubleVar()
+        lable_Fuel=tk.Label(controller, text="Fuel(L)",fg ="#8c8c8c",bg ="White",font=MainFont)     
+        lable_Fuel.place(x=(controller.winfo_screenwidth()/2)-100,y=150)
+        Entry_Fuel=tk.Entry(controller, textvariable=fuel,fg ="#E24A33 ",bg ="#E5E5E5",relief=tk.FLAT)
+        Entry_Fuel.place(x=(controller.winfo_screenwidth()/2)-100,y=200)
+        
+        #Thrust widgets(Lable&Entry)
+        thrust=tk.DoubleVar()
+        lable_Thrust=tk.Label(controller, text="Engine thrust(KN)",fg ="#8c8c8c",bg ="White",font=MainFont)     
+        lable_Thrust.place(y=300)
+        Entry_Thrust=tk.Entry(controller, textvariable=thrust,fg ="#E24A33 ",bg ="#E5E5E5",relief=tk.FLAT)
+        Entry_Thrust.place(y=350)
 
-#These functions clear the Entry widgets
-def clearAngle(event):
-        print("Cleared Angle Input")
-        angleValue.set("")
-        event.widget.config(textvariable=angleValue)
-
-def clearVelocity(event):
-    print("Cleared Resultant Velocity Input")
-    LaunchVel.set("")
-    event.widget.config(textvariable=LaunchVel)
-
-
-#Angle information- Creates a lable and an entry box (Which can be cleared) as well as declares the variable for the value of launch velocity
-angleValue=StringVar()
-angleValue.set('Use values > 0')    
-lable_LaunchAngle=Label(inputPos, text="θ° ",fg ="#8c8c8c",bg ="White",font=MainFont)
-lable_LaunchAngle.place(x=0,y=50)
-entry_LaunchAngle=Entry(inputPos, textvariable=angleValue,fg ="#E24A33 ",bg ="#E5E5E5",relief=FLAT)
-entry_LaunchAngle.place(x=150*resolutionOffset,y=57)
-entry_LaunchAngle.bind("<1>",clearAngle)
-
-#Launch velocity information- Creates a lable and an entry box (Which can be cleared) as well as declares the variable for the value of launch velocity
-LaunchVel=StringVar()
-LaunchVel.set('Use values > 0')
-lable_LaunchVel=Label(inputPos, text="Vr(m/s)  ",fg ="#8c8c8c",bg ="White",font=MainFont)     
-lable_LaunchVel.place(x=2,y=100)
-entry_LaunchVel=Entry(inputPos, textvariable=LaunchVel,fg ="#E24A33 ",bg ="#E5E5E5",relief=FLAT)
-entry_LaunchVel.place(x=150*resolutionOffset,y=107)
-entry_LaunchVel.bind("<FocusIn>",clearVelocity)
-
-#Launch button- Creates a button which "launches" the rocket (goes to the launch Procedure)
-launchButton=Button(inputPos,text="LAUNCH",fg ="#E24A33 ",relief=FLAT,bg="#E5E5E5",font=MainFont)
-launchButton.place(x=100*resolutionOffset,y=150)
-launchButton.bind("<1>",launch)
-
-#Errors- Shows any errors to the user.
-errorText=Label(inputPos, text="",fg ="#E24A33 ",bg ="White")
-
-errorText.place(x=0,y=height-30)
-
-#Ouput Lables- Shows the maximum height of the projectile and the horizontal displacement
-vDisplacement=StringVar()
-hDisplacement=StringVar()
-Time=StringVar()
-Lable_vDisplacement=Label(inputPos, textvariable=vDisplacement,fg ="#E24A33 ",bg ="White",font=infoLableFont)
-Lable_vDisplacement.place(x=0,y=200)
-Lable_hDisplacement=Label(inputPos, textvariable=hDisplacement,fg ="#E24A33 ",bg ="White",font=infoLableFont)
-Lable_hDisplacement.place(x=0,y=250)
-Lable_Time=Label(inputPos, textvariable=Time,fg ="#E24A33 ",bg ="White",font=infoLableFont)
-Lable_Time.place(x=0,y=300)
+        #Burn time widgets(Lable&Entry)
+        burnTime=tk.DoubleVar()
+        lable_burnTime=tk.Label(controller, text="Burn Time(S)",fg ="#8c8c8c",bg ="White",font=MainFont)     
+        lable_burnTime.place(x=(controller.winfo_screenwidth()/2)-100,y=300)
+        Entry_burnTime=tk.Entry(controller, textvariable=burnTime,fg ="#E24A33 ",bg ="#E5E5E5",relief=tk.FLAT)
+        Entry_burnTime.place(x=(controller.winfo_screenwidth()/2)-100,y=350)
+       
+        #This function is called when a button is pressed which chaneges the current state(works like a queue)
+        def changeStageState(event,option,):
+            self.currentStageNumber
+            #Add a stage
+            if option=="Add":
+                self.currentStageNumber=len(stagesList)
+                currentStage=self.Stages(self.currentStageNumber)
+                stagesList.append(currentStage)
+            #Cycle left
+            elif option=="Left":
+                if self.currentStageNumber!=0:
+                    self.currentStageNumber-=1
+            #Cycle right
+            elif option=="Right":
+                if self.currentStageNumber<len(stagesList)-1:
+                    self.currentStageNumber+=1
+            #Set all of the DoubleVars to the correct stage
+            stageValue.set("Stage %i"%(self.currentStageNumber))
+            currentStage=stagesList[self.currentStageNumber]
+            mass.set(str(currentStage.mass))
+            angle.set(str(currentStage.angle))
+            fuel.set(str(currentStage.amountOfFuel))
+            thrust.set(str(currentStage.thrust))
+            burnTime.set(str(currentStage.burnTime))
+        
+        def saveStage(event):
+            print("Saving stage%i"%(self.currentStageNumber))
+            stagesList[self.currentStageNumber].mass=Entry_Mass.get()
+            stagesList[self.currentStageNumber].angle=Entry_Angle.get()
+            stagesList[self.currentStageNumber].amountOfFuel=Entry_Fuel.get()
+            stagesList[self.currentStageNumber].thrust=Entry_Thrust.get()
+            stagesList[self.currentStageNumber].burnTime=Entry_burnTime.get()
+            print(stagesList[self.currentStageNumber].mass,stagesList[self.currentStageNumber].angle,stagesList[self.currentStageNumber].amountOfFuel,stagesList[self.currentStageNumber].thrust,stagesList[self.currentStageNumber].burnTime)
+        
+        #Adds a stage to the rocket
+        addStageButton=tk.Button(controller,text="   + Stage    ",fg ="#E24A33 ",relief=tk.FLAT,bg="#E5E5E5",font=MainFont)
+        addStageButton.place(x=(controller.winfo_screenwidth()/2)-125)
+        addStageButton.bind("<Button-1>",lambda event:changeStageState(event,"Add"))
+        #Save the values for the current stage
+        saveStageButton=tk.Button(controller,text="Save Stage",fg ="#E24A33 ",relief=tk.FLAT,bg="#E5E5E5",font=MainFont)
+        saveStageButton.place(x=(controller.winfo_screenwidth()/2)-125,y=(parent.winfo_screenheight()/2)-45)
+        saveStageButton.bind("<Button-1>",lambda event:saveStage(event))
+        #Cycles to the stage before the current one current stage=0 then don't show
+        cycleStageLeft=tk.Button(controller,text="<",fg ="#E24A33 ",relief=tk.FLAT,bg="#E5E5E5",font=MainFont)
+        cycleStageLeft.place(x=(controller.winfo_screenwidth()/4)-100)
+        cycleStageLeft.bind("<Button-1>",lambda event:changeStageState(event,"Left"))
+        #Cycles to the stage after the current one# current stage=max then don't show
+        cycleStageRight=tk.Button(controller,text=">",fg ="#E24A33 ",relief=tk.FLAT,bg="#E5E5E5",font=MainFont)
+        cycleStageRight.place(x=(controller.winfo_screenwidth()/4)+100)
+        cycleStageRight.bind("<Button-1>",lambda event:changeStageState(event,"Right"))
 
 #Main loop
-root.mainloop()
+program=TrajectoryGrapher()
+program.mainloop()
