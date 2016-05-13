@@ -5,12 +5,12 @@ The rocket acts only on the X-Y plane and (for now) only uses the simple kinemat
 
 What I plan to add:
 
-*Animated graphs
+  *Animated graphs
 
-*Complex physics 
+  *Complex physics 
 
-*Different stages
+  *Different stages
 
-*Different graphs(Velocity-Time, Displacement-Time and others)
+  *Different graphs(Velocity-Time, Displacement-Time and others)
 
 
