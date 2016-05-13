@@ -1,5 +1,12 @@
-#  Trajectory grapher
-This program is written in Python 3.4 and uses the Tkinter and Matplotlib modules to create a GUI and graph to plot the trajectory of a projectile.
+#  Rocket Grapher
+This program is written in Python 3.4 and uses the Tkinter and Matplotlib modules to create a GUI and graph to plot various graphs of a rocket being launched.
 
-The projectile acts on an X-Y plane and is not affected by any forces (Essentially if it were launched in space). To calculate the values for the graph points I used the simple kinematic equations (SUVAT).
+The rocket acts only on the X-Y plane and (for now) only uses the simple kinematic equations and does not consider other variables such as engine thrust or mass.
+
+What I plan to add:
+*Animated graphs
+*Complex physics 
+*Different stages
+*Different graphs(Velocity-Time, Displacement-Time and others)
+
 
