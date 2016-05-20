@@ -1,74 +1,9 @@
-"""
-import tkinter as tk   # python3
-#import Tkinter as tk   # python
-TITLE_FONT = ("Helvetica", 18, "bold")
-class SampleApp(tk.Tk):
-    def __init__(self, *args, **kwargs):
-        tk.Tk.__init__(self, *args, **kwargs)
-        # the container is where we'll stack a bunch of frames
-        # on top of each other, then the one we want visible
-        # will be raised above the others
-        container = tk.Frame(self)
-        container.pack(side="top", fill="both", expand=True)
-        container.grid_rowconfigure(0, weight=1)
-        container.grid_columnconfigure(0, weight=1)
-        self.frames = {}
-        for F in (StartPage, PageOne, PageTwo):
-            page_name = F.__name__
-            frame = F(container, self)
-            self.frames[page_name] = frame
-            # put all of the pages in the same location;
-            # the one on the top of the stacking order
-            # will be the one that is visible.
-            frame.grid(row=0, column=0, sticky="nsew")
-        self.show_frame("StartPage")
-    def show_frame(self, page_name):
-        '''Show a frame for the given page name'''
-        frame = self.frames[page_name]
-        frame.tkraise()
-class StartPage(tk.Frame):
-    def __init__(self, parent, controller):
-        tk.Frame.__init__(self, parent)
-        self.controller = controller
-        tk.Label = tk.tk.Label(self, text="This is the start page", font=TITLE_FONT)
-        tk.Label.pack(side="top", fill="x", pady=10)
-        button1 = tk.Button(self, text="Go to Page One",
-                            command=lambda: controller.show_frame("PageOne"))
-        button2 = tk.Button(self, text="Go to Page Two",
-                            command=lambda: controller.show_frame("PageTwo"))
-        button1.pack()
-        button2.pack()
-class PageOne(tk.Frame):
-    def __init__(self, parent, controller):
-        tk.Frame.__init__(self, parent)
-        self.controller = controller
-        tk.Label = tk.tk.Label(self, text="This is page 1", font=TITLE_FONT)
-        tk.Label.pack(side="top", fill="x", pady=10)
-        button = tk.Button(self, text="Go to the start page",
-                           command=lambda: controller.show_frame("StartPage"))
-        button.pack()
-class PageTwo(tk.Frame):
-    def __init__(self, parent, controller):
-        tk.Frame.__init__(self, parent)
-        self.controller = controller
-        tk.Label = tk.tk.Label(self, text="This is page 2", font=TITLE_FONT)
-        tk.Label.pack(side="top", fill="x", pady=10)
-        button = tk.Button(self, text="Go to the start page",
-                           command=lambda: controller.show_frame("StartPage"))
-        button.pack()
-if __name__ == "__main__":
-    app = SampleApp()
-    app.mainloop()
-"""
-
-"""
-This program plots the trajectory of a projectile using the SUVAT equations (That means no fancy physics, unfortunately).
-"""
 import tkinter as tk
 from math import *
 #Fonts/Styles
-MainFont=("TkDefaultFont",15,"bold")
-infoLableFont=("TkDefaultFont",10,"bold")
+MainFont=("TkDefaultFont",8,"bold")
+headdingfont=("TkDefaultFont",10,"bold")
+# This is they array that will hold of all of the class instances of Stages
 stagesList=list()
 
 
@@ -86,17 +21,18 @@ class TrajectoryGrapher(tk.Tk):
         #Creates a dictonary for all of the frames 
         self.frames={}
         for F in (stageingFrame, graphFrame):
-            page_name = F.__name__
+            page_name = F.__name__#Sets the page name as what is in 
             frame = F(container, self)
             self.frames[page_name] = frame
-
        # frame = stageingFrame(container,self)# Change to graph frame when it is developed
         frame.grid(row=5,column=0,sticky="nsew")
         self.showFrame("stageingFrame")
-
+        
     def showFrame(self,page_name):
         frame = self.frames[page_name]
         frame.tkraise()
+
+        
         
 #Class which has all of the graph information
 class graphFrame(tk.Frame):
@@ -108,6 +44,7 @@ class graphFrame(tk.Frame):
 class helpFrame(tk.Frame):
     def __init__(self,parent,controller):
         tk.Frame.__init__(self,parent)
+
      
 #Class which has all of the stageing information
 #TODO: Add validation to the enrties
@@ -120,54 +57,119 @@ class stageingFrame(tk.Frame):
         angle=None
         thrust=None
         amountOfFuel=None
+        burnTime=None
+        stageColor=None
         def __init__(self,number):
            self.stageNumber=number
-           print("Last stage added %i" %(self.stageNumber))   
-    if len(stagesList)==0:
-        startStage=Stages(0)
-        stagesList.append(startStage)
+           print("Last stage added %i" %(self.stageNumber))
+           
+   
 
     def __init__(self,parent,controller):
-        tk.Frame.__init__(self,parent)
-        #Creates the menu bar   
+        if len(stagesList)==0:
+            startStage=self.Stages(0)
+            stagesList.append(startStage)
+        tk.Frame.__init__(self,parent) 
         self.controller = controller
+        #Rocket config
+        
+        #Rocket config heading
+        lable_rocketOptions=tk.Label(controller, text="Rocket config",fg ="#737373",bg ="White",font=headdingfont)
+        lable_rocketOptions.place(x=(controller.winfo_screenwidth()/2)-150)
+        
+        #Stage value
         stageValue=tk.StringVar()
         stageValue.set("Stage 0")    
         lable_stageValue=tk.Label(controller, textvariable=stageValue,fg ="#8c8c8c",bg ="White",font=MainFont)
-        lable_stageValue.place(x=(controller.winfo_screenwidth()/4)-22,y=0)
+        lable_stageValue.place(x=(controller.winfo_screenwidth()/2)-150,y=30)
         
         #Mass widgets(Lable&Entry)
         mass=tk.DoubleVar()
         lable_Mass=tk.Label(controller, text="Mass(KG)",fg ="#8c8c8c",bg ="White",font=MainFont)   
-        lable_Mass.place(y=150)  
+        lable_Mass.place(x=controller.winfo_screenwidth()/4+150,y=50)  
         Entry_Mass=tk.Entry(controller,textvariable=mass, fg ="#E24A33 ",bg ="#E5E5E5",relief=tk.FLAT)
-        Entry_Mass.place(y=200)
+        Entry_Mass.place(x=controller.winfo_screenwidth()/4+150,y=70)
         
         #Angle widgets(Lable&Entry)
         angle=tk.DoubleVar()
         lable_Angle=tk.Label(controller, text="Angle(°)",fg ="#8c8c8c",bg ="White",font=MainFont)     
-        lable_Angle.place(x=(controller.winfo_screenwidth()/4)-22,y=150)
+        lable_Angle.place(x=controller.winfo_screenwidth()/4+150,y=90)
         Entry_Angle=tk.Entry(controller, textvariable=angle,fg ="#E24A33 ",bg ="#E5E5E5",relief=tk.FLAT)
-        Entry_Angle.place(x=(controller.winfo_screenwidth()/4)-22,y=200)
+        Entry_Angle.place(x=controller.winfo_screenwidth()/4+150,y=110)
         
         #Fuel widgets(Lable&Entry)
         fuel=tk.DoubleVar()
         lable_Fuel=tk.Label(controller, text="Fuel(L)",fg ="#8c8c8c",bg ="White",font=MainFont)     
-        lable_Fuel.place(x=(controller.winfo_screenwidth()/2)-100,y=150)
+        lable_Fuel.place(x=controller.winfo_screenwidth()/4+150,y=130)
         Entry_Fuel=tk.Entry(controller, textvariable=fuel,fg ="#E24A33 ",bg ="#E5E5E5",relief=tk.FLAT)
-        Entry_Fuel.place(x=(controller.winfo_screenwidth()/2)-100,y=200)
+        Entry_Fuel.place(x=controller.winfo_screenwidth()/4+150,y=150)
         
         #Thrust widgets(Lable&Entry)
         thrust=tk.DoubleVar()
         lable_Thrust=tk.Label(controller, text="Engine thrust(KN)",fg ="#8c8c8c",bg ="White",font=MainFont)     
-        lable_Thrust.place(y=300)
+        lable_Thrust.place(x=controller.winfo_screenwidth()/4+150,y=170)
         Entry_Thrust=tk.Entry(controller, textvariable=thrust,fg ="#E24A33 ",bg ="#E5E5E5",relief=tk.FLAT)
-        Entry_Thrust.place(y=350)
+        Entry_Thrust.place(x=controller.winfo_screenwidth()/4+150,y=190)
+
+        #Burn time widgets(Lable&Entry)
+        burnTime=tk.DoubleVar()
+        lable_burnTime=tk.Label(controller, text="Burn Time(S)",fg ="#8c8c8c",bg ="White",font=MainFont)     
+        lable_burnTime.place(x=controller.winfo_screenwidth()/4+150,y=210)
+        Entry_burnTime=tk.Entry(controller, textvariable=burnTime,fg ="#E24A33 ",bg ="#E5E5E5",relief=tk.FLAT)
+        Entry_burnTime.place(x=controller.winfo_screenwidth()/4+150,y=230)
+        
+        #Color widgets(canvas,lable&Entry)
+        stageColor=tk.StringVar()
+        stageColor.set("#")
+        lable_stageColor=tk.Label(controller, text="Stage color (Hex)",fg ="#8c8c8c",bg ="White",font=MainFont)     
+        lable_stageColor.place(x=controller.winfo_screenwidth()/4+150,y=250)
+        Entry_stageColor=tk.Entry(controller, textvariable=stageColor,fg ="#E24A33 ",bg ="#E5E5E5",relief=tk.FLAT)
+        Entry_stageColor.place(x=controller.winfo_screenwidth()/4+150,y=270)
+        Entry_stageColor.bind("<FocusOut>",lambda event:saveColor(event))
+        colorBox=tk.Canvas(controller, width=25, height=15)
+        colorBox.place(x=(controller.winfo_screenwidth()/2-70),y=270)
+        colorBox.bind("<FocusOut>",lambda event:saveColor(event))
+
+        #Adds a stage to the rocket
+        addStageButton=tk.Button(controller,text="   + Stage    ",fg ="#E24A33 ",relief=tk.FLAT,bg="#E5E5E5",font=MainFont)
+        addStageButton.place(x=(controller.winfo_screenwidth()/2-60),y=30)
+        addStageButton.bind("<Button-1>",lambda event:changeStageState(event,"Add"))
+        #Save the values for the current stage
+        saveStageButton=tk.Button(controller,text="Save Stage",fg ="#E24A33 ",relief=tk.FLAT,bg="#E5E5E5",font=MainFont)
+        saveStageButton.place(x=(controller.winfo_screenwidth()/2-70),y=300)
+        saveStageButton.bind("<Button-1>",lambda event:saveStage(event))
+        #Cycles to the stage before the current one current stage=0 then don't show
+        cycleStageLeft=tk.Button(controller,text="<",fg ="#E24A33 ",relief=tk.FLAT,bg="#E5E5E5",font=MainFont)
+        cycleStageLeft.place(x=(controller.winfo_screenwidth()/4)+150,y=30)
+        cycleStageLeft.bind("<Button-1>",lambda event:changeStageState(event,"Left"))
+        #Cycles to the stage after the current one# current stage=max then don't show
+        cycleStageRight=tk.Button(controller,text=">",fg ="#E24A33 ",relief=tk.FLAT,bg="#E5E5E5",font=MainFont)
+        cycleStageRight.place(x=(controller.winfo_screenwidth()/4)+220,y=30)
+        cycleStageRight.bind("<Button-1>",lambda event:changeStageState(event,"Right"))
+
+        #Graph config TODO: add a drop down box with the graph types, add a function to save the current graph
+        
+        #Graph config headding
+        lable_graphOptions=tk.Label(controller, text="Graph config",fg ="#737373",bg ="White",font=headdingfont)
+        lable_graphOptions.place(x=(controller.winfo_screenwidth()/2)-150,y=330)
+        #Graph type labe
+        lable_graphType=tk.Label(controller, text="Graph type",fg ="#8c8c8c",bg ="White",font=MainFont)
+        lable_graphType.place(x=controller.winfo_screenwidth()/4+150,y=350)
+        #Save graph button
+        saveGraphButton=tk.Button(controller,text="Save Graph",fg ="#E24A33 ",relief=tk.FLAT,bg="#E5E5E5",font=MainFont)
+        saveGraphButton.place(x=controller.winfo_screenwidth()/2-70,y=380)
+        #saveGraphButton.bind("<Button-1>",lambda event:changeStageState(event,"Add"))
+
+#I need to remove the functions from the INIT 
+        
+        #Changes the color of the canvas when the keyboard leaves the colorBox entry widget
+        def saveColor(event):
+            colorBox.config(bg=Entry_stageColor.get())
        
         #This function is called when a button is pressed which chaneges the current state(works like a queue)
         def changeStageState(event,option,):
             self.currentStageNumber
-            #Add a stage
+            #Add a stage. Does this by increaseing the stageNumber, createing a class instance of "Stages" and then appending that instance to and array
             if option=="Add":
                 self.currentStageNumber=len(stagesList)
                 currentStage=self.Stages(self.currentStageNumber)
@@ -180,39 +182,28 @@ class stageingFrame(tk.Frame):
             elif option=="Right":
                 if self.currentStageNumber<len(stagesList)-1:
                     self.currentStageNumber+=1
-            #Set all of the DoubleVars to the correct stage
+            #Sets all of the entry widgets to the value of the currentStages class instance 
             stageValue.set("Stage %i"%(self.currentStageNumber))
             currentStage=stagesList[self.currentStageNumber]
             mass.set(str(currentStage.mass))
             angle.set(str(currentStage.angle))
             fuel.set(str(currentStage.amountOfFuel))
             thrust.set(str(currentStage.thrust))
-        
+            burnTime.set(str(currentStage.burnTime))
+            colorBox.config(bg=currentStage.stageColor)
+            stageColor.set(str(currentStage.stageColor))
+            
+        #Saves all of the enties as the variable in the current class instance
         def saveStage(event):
             print("Saving stage%i"%(self.currentStageNumber))
             stagesList[self.currentStageNumber].mass=Entry_Mass.get()
             stagesList[self.currentStageNumber].angle=Entry_Angle.get()
             stagesList[self.currentStageNumber].amountOfFuel=Entry_Fuel.get()
             stagesList[self.currentStageNumber].thrust=Entry_Thrust.get()
-            print(stagesList[self.currentStageNumber].mass,stagesList[self.currentStageNumber].angle,stagesList[self.currentStageNumber].amountOfFuel,stagesList[self.currentStageNumber].thrust)
-        
-        #Adds a stage to the rocket
-        addStageButton=tk.Button(controller,text="   + Stage    ",fg ="#E24A33 ",relief=tk.FLAT,bg="#E5E5E5",font=MainFont)
-        addStageButton.place(x=(controller.winfo_screenwidth()/2)-125)
-        addStageButton.bind("<Button-1>",lambda event:changeStageState(event,"Add"))
-        #Save the values for the current stage
-        saveStageButton=tk.Button(controller,text="Save Stage",fg ="#E24A33 ",relief=tk.FLAT,bg="#E5E5E5",font=MainFont)
-        saveStageButton.place(x=(controller.winfo_screenwidth()/2)-125,y=(parent.winfo_screenheight()/2)-45)
-        saveStageButton.bind("<Button-1>",lambda event:saveStage(event))
-        #Cycles to the stage before the current one current stage=0 then don't show
-        cycleStageLeft=tk.Button(controller,text="<",fg ="#E24A33 ",relief=tk.FLAT,bg="#E5E5E5",font=MainFont)
-        cycleStageLeft.place(x=(controller.winfo_screenwidth()/4)-100)
-        cycleStageLeft.bind("<Button-1>",lambda event:changeStageState(event,"Left"))
-        #Cycles to the stage after the current one# current stage=max then don't show
-        cycleStageRight=tk.Button(controller,text=">",fg ="#E24A33 ",relief=tk.FLAT,bg="#E5E5E5",font=MainFont)
-        cycleStageRight.place(x=(controller.winfo_screenwidth()/4)+100)
-        cycleStageRight.bind("<Button-1>",lambda event:changeStageState(event,"Right"))
-
+            stagesList[self.currentStageNumber].burnTime=Entry_burnTime.get()
+            stagesList[self.currentStageNumber].stageColor=Entry_stageColor.get()
+            
 #Main loop
 program=TrajectoryGrapher()
 program.mainloop()
+
