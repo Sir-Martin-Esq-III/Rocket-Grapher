@@ -103,9 +103,12 @@ def math(angle,stageNumber,
          print(graphType)
         #Do the math to plot all this graph
     elif graphType=="XVelocity-YVelocity":
+        #X v is constant
+        #v=u+at
         x_AxisLable=""
         y_AxisLable=""
-        print(graphType)
+        
+        
 
         
 #Class which has all of the graph information
