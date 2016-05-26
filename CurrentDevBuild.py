@@ -2,8 +2,8 @@ import tkinter as tk
 from math import *
 
 import matplotlib
-matplotlib.use("TkAgg")
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2TkAgg
+matplotlib.use('TkAgg')
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.pyplot as plt
 from matplotlib import style
 style.use('ggplot')
@@ -17,8 +17,13 @@ MainFont=("TkDefaultFont",8,"bold")
 headdingfont=("TkDefaultFont",10,"bold")
 # This is they array that will hold of all of the class instances of Stages
 stagesList=list()
-graphType=None
-
+graphType=""
+xvalues= [None] * 18
+yvalues= [None] * 18
+lastXVel=0
+lastYVel=0
+x_AxisLable=""
+y_AxisLable=""
 
 class TrajectoryGrapher(tk.Tk):
     def __init__(self,*args,**kwargs):
@@ -26,7 +31,7 @@ class TrajectoryGrapher(tk.Tk):
         tk.Tk.__init__(self,*args,**kwargs)
         width=self.winfo_screenwidth()/2
         height=self.winfo_screenheight()/2
-        self.title("Trajectory Grapher")
+        self.title("Rocket Science 9000")
         self.geometry("%dx%d+%d+%d" %(width,height,width/2,height/2))
         self.resizable(False,False)
         container=tk.Frame(self,bg="#fff")
@@ -47,30 +52,92 @@ class TrajectoryGrapher(tk.Tk):
         frame.tkraise()
 
         
+def math(angle,stageNumber,
+         engineThrust,burnTime,
+         mass,fuel,
+         graphType):
+    global x_AxisLable
+    global y_AxisLable
+    
+    gravity=9.81
+    TWR=(int(engineThrust/mass*gravity))
+    resForce=(engineThrust-(mass*gravity))
+    velocity=(resForce*burnTime)/mass
+    global lastXVel
+    global lastYVel
+    Xcomp=velocity*(cos(radians(angle)))#cos
+    Ycomp=velocity*(sin(radians(angle)))#sin
+    time=(2*Ycomp)/gravity
+    maxHorizDisp=time*Xcomp
+    maxVertDisp=(-(Ycomp**2)/(2*-gravity))
+    #TWR=engine thrust/mass*gravity
+    print(stageNumber)                            
+    if graphType=="Displacement-Time":
+        x_AxisLable=""
+        y_AxisLable=""
+        print(graphType)
+        #Do the math to plot all this graph
+    elif graphType=="Velocity-Time":
+        x_AxisLable=""
+        y_AxisLable=""
+        print(graphType)
+        #Do the math to plot all this graph
+    elif graphType=="XDisplacement-YDisplacement":
+        x_AxisLable="X-Displacement(m)"
+        y_AxisLable="y-Displacement(m)"
+        for i in range(0,36):
+         updateTime=(time*(i/35))
+         if updateTime>time/2:
+             lastXVel=xvalues[len(xvalues)-1]
+             lastYVel=yvalues[len(yvalues)-1]
+             break
+         else:
+             #Check for graph type
+             if stageNumber!=0:
+                 yvalues[i]=((lastYVel)+(Ycomp*updateTime)+((-1/2*gravity)*(updateTime*updateTime)))
+                 xvalues[i]=((lastXVel)+(updateTime*Xcomp))
+             else:
+                 yvalues[i]=((Ycomp*updateTime)+((-1/2*gravity)*(updateTime*updateTime)))
+                 xvalues[i]=(updateTime*Xcomp) 
+
+         print(graphType)
+        #Do the math to plot all this graph
+    elif graphType=="XVelocity-YVelocity":
+        x_AxisLable=""
+        y_AxisLable=""
+        print(graphType)
+
         
 #Class which has all of the graph information
 class graphFrame(tk.Frame):
-    
+    #Creates a graph on class init so that it displays it when the program runs
     def __init__(self,parent,controller):
         global Controller
         Controller=controller
         tk.Frame.__init__(self,parent)
-        print("hello")
         f = plt.figure(figsize=(4,5), dpi=100,frameon=False,tight_layout=True)
-        a = f.add_subplot(111)
-        a.plot([0,0])
+        plt.plot()
         canvas = FigureCanvasTkAgg(f, Controller)
         canvas._tkcanvas.config(highlightthickness=0)
         canvas.show()
         canvas.get_tk_widget().place(x=0,y=0)
 
-    def updateGraph(self,controller):
+    def updateGraph(self,controller,graphType):
         f = plt.figure(figsize=(4,5), dpi=100,frameon=False,tight_layout=True)
         a = f.add_subplot(111)
         for i in range(len(stagesList)):
+            math(stagesList[i].angle,stagesList[i].stageNumber,
+                 stagesList[i].thrust,stagesList[i].burnTime,
+                 stagesList[i].mass,stagesList[i].amountOfFuel,
+                 graphType)
+            
             color=stagesList[i].stageColor
-            print(color)
-            a=plt.plot([1,2,3,4,5,6,7,8],[5,6,1,3,8,9,3,5],color)
+            print(str(color))
+            #Call the math function and return the plots
+            a=plt.plot(xvalues,yvalues)
+            plt.setp(a, color=color, linewidth=2.0)
+        plt.ylabel(y_AxisLable)
+        plt.xlabel(x_AxisLable)
         canvas = FigureCanvasTkAgg(f, Controller)
         canvas._tkcanvas.config(highlightthickness=0)
         canvas.show()
@@ -93,11 +160,7 @@ class stageingFrame(tk.Frame):
         def __init__(self,number):
            self.stageNumber=number
            print("Last stage added %i" %(self.stageNumber))
-           
-    def launch():
-        TrajectoryGrapher.showFrame(graphFrame)
-       
-
+        
     def __init__(self,parent,controller):
         if len(stagesList)==0:
             startStage=self.Stages(0)
@@ -209,7 +272,9 @@ class stageingFrame(tk.Frame):
             colorBox.config(bg=Entry_stageColor.get())
             
         def launch(event):
-            graphFrame.updateGraph(TrajectoryGrapher,controller)
+            graphType=currentGraphType.get()
+            print(graphType)
+            graphFrame.updateGraph(TrajectoryGrapher,controller,graphType)
             
             
        
@@ -243,14 +308,13 @@ class stageingFrame(tk.Frame):
         #Saves all of the enties as the variable in the current class instance
         def saveStage(event):
             print("Saving stage%i"%(self.currentStageNumber))
-            stagesList[self.currentStageNumber].mass=Entry_Mass.get()
-            stagesList[self.currentStageNumber].angle=Entry_Angle.get()
-            stagesList[self.currentStageNumber].amountOfFuel=Entry_Fuel.get()
-            stagesList[self.currentStageNumber].thrust=Entry_Thrust.get()
-            stagesList[self.currentStageNumber].burnTime=Entry_burnTime.get()
-            stagesList[self.currentStageNumber].stageColor=Entry_stageColor.get()
-            #graphType=currentGraphType.get() This will be used when the rocket is launched
-            
+            stagesList[self.currentStageNumber].mass=int(Entry_Mass.get())
+            stagesList[self.currentStageNumber].angle=int(Entry_Angle.get())
+            stagesList[self.currentStageNumber].amountOfFuel=int(Entry_Fuel.get())
+            stagesList[self.currentStageNumber].thrust=int(Entry_Thrust.get())
+            stagesList[self.currentStageNumber].burnTime=int(Entry_burnTime.get())
+            stagesList[self.currentStageNumber].stageColor=str(Entry_stageColor.get())
+                        
             
 #Main loop
 program=TrajectoryGrapher()
