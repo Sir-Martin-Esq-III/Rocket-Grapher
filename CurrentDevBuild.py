@@ -8,18 +8,12 @@ import matplotlib.pyplot as plt
 from matplotlib import style
 style.use('ggplot')
 
-
-
-
-
 #Fonts/Styles
 MainFont=("TkDefaultFont",8,"bold")
 headdingfont=("TkDefaultFont",10,"bold")
 # This is they array that will hold of all of the class instances of Stages
 stagesList=list()
 graphType=""
-xvalues= [None] * 18
-yvalues= [None] * 18
 lastXVel=0
 lastYVel=0
 x_AxisLable=""
@@ -46,70 +40,9 @@ class TrajectoryGrapher(tk.Tk):
         frame.grid(row=5,column=0,sticky="nsew")
         self.showFrame("stageingFrame")
         
-        
     def showFrame(self,page_name):
         frame = self.frames[page_name]
         frame.tkraise()
-
-        
-def math(angle,stageNumber,
-         engineThrust,burnTime,
-         mass,fuel,
-         graphType):
-    global x_AxisLable
-    global y_AxisLable
-    
-    gravity=9.81
-    TWR=(int(engineThrust/mass*gravity))
-    resForce=(engineThrust-(mass*gravity))
-    velocity=(resForce*burnTime)/mass
-    global lastXVel
-    global lastYVel
-    Xcomp=velocity*(cos(radians(angle)))#cos
-    Ycomp=velocity*(sin(radians(angle)))#sin
-    time=(2*Ycomp)/gravity
-    maxHorizDisp=time*Xcomp
-    maxVertDisp=(-(Ycomp**2)/(2*-gravity))
-    #TWR=engine thrust/mass*gravity
-    print(stageNumber)                            
-    if graphType=="Displacement-Time":
-        x_AxisLable=""
-        y_AxisLable=""
-        print(graphType)
-        #Do the math to plot all this graph
-    elif graphType=="Velocity-Time":
-        x_AxisLable=""
-        y_AxisLable=""
-        print(graphType)
-        #Do the math to plot all this graph
-    elif graphType=="XDisplacement-YDisplacement":
-        x_AxisLable="X-Displacement(m)"
-        y_AxisLable="y-Displacement(m)"
-        for i in range(0,36):
-         updateTime=(time*(i/35))
-         if updateTime>time/2:
-             lastXVel=xvalues[len(xvalues)-1]
-             lastYVel=yvalues[len(yvalues)-1]
-             break
-         else:
-             #Check for graph type
-             if stageNumber!=0:
-                 yvalues[i]=((lastYVel)+(Ycomp*updateTime)+((-1/2*gravity)*(updateTime*updateTime)))
-                 xvalues[i]=((lastXVel)+(updateTime*Xcomp))
-             else:
-                 yvalues[i]=((Ycomp*updateTime)+((-1/2*gravity)*(updateTime*updateTime)))
-                 xvalues[i]=(updateTime*Xcomp) 
-
-         print(graphType)
-        #Do the math to plot all this graph
-    elif graphType=="XVelocity-YVelocity":
-        #X v is constant
-        #v=u+at
-        x_AxisLable=""
-        y_AxisLable=""
-        
-        
-
         
 #Class which has all of the graph information
 class graphFrame(tk.Frame):
@@ -124,20 +57,76 @@ class graphFrame(tk.Frame):
         canvas._tkcanvas.config(highlightthickness=0)
         canvas.show()
         canvas.get_tk_widget().place(x=0,y=0)
+        
+    #Does all of the math to plot the points
+    def getPlots(angle,stageNumber,
+         engineThrust,burnTime,
+         mass,fuel,
+         graphType):
+        xvalues= [None] * 18
+        yvalues= [None] * 18
+        global x_AxisLable
+        global y_AxisLable
+    
+        gravity=9.81
+        TWR=(int(engineThrust/mass*gravity))
+        resForce=(engineThrust-(mass*gravity))
+        velocity=(resForce*burnTime)/mass
+        global lastXVel
+        global lastYVel
+        Xcomp=velocity*(cos(radians(angle)))#cos
+        Ycomp=velocity*(sin(radians(angle)))#sin
+        time=(2*Ycomp)/gravity
+        maxHorizDisp=time*Xcomp
+        maxVertDisp=(-(Ycomp**2)/(2*-gravity))
+    #TWR=engine thrust/mass*gravity        
+        if graphType=="Displacement-Time":
+            x_AxisLable=""
+            y_AxisLable=""
+            print(graphType)
+        #Do the math to plot all this graph
+        elif graphType=="Velocity-Time":
+            x_AxisLable=""
+            y_AxisLable=""
+            print(graphType)
+        #Do the math to plot all this graph
+    #XDISP & YDISP GRAPH
+        elif graphType=="XDisplacement-YDisplacement":
+            x_AxisLable="X-Displacement(m)"
+            y_AxisLable="y-Displacement(m)"
+            for i in range(0,36):
+             updateTime=(time*(i/35))
+             if updateTime>time/2:
+                 lastXVel=xvalues[len(xvalues)-1]
+                 lastYVel=yvalues[len(yvalues)-1]
+                 break
+             else:
+                 #Check for graph type
+                 if stageNumber!=0:
+                     yvalues[i]=((lastYVel)+(Ycomp*updateTime)+((-1/2*gravity)*(updateTime*updateTime)))
+                     xvalues[i]=((lastXVel)+(updateTime*Xcomp))
+                 else:
+                     yvalues[i]=((Ycomp*updateTime)+((-1/2*gravity)*(updateTime*updateTime)))
+                     xvalues[i]=(updateTime*Xcomp) 
 
-    def updateGraph(self,controller,graphType):
+        elif graphType=="XVelocity-YVelocity":
+            x_AxisLable=""
+            y_AxisLable=""
+        return(xvalues,yvalues)
+        
+    #Need to find a way to not have to create a new figure everytime. It limits the program to 20 laucnhes
+    def updateGraph(self,controller,graphType):  
         f = plt.figure(figsize=(4,5), dpi=100,frameon=False,tight_layout=True)
-        a = f.add_subplot(111)
+        #Calls the math function for every stage that the user has created
         for i in range(len(stagesList)):
-            math(stagesList[i].angle,stagesList[i].stageNumber,
+            # Checks what  graph the user wants and then finds 
+            xvals,yvals=self.getPlots(stagesList[i].angle,stagesList[i].stageNumber,
                  stagesList[i].thrust,stagesList[i].burnTime,
                  stagesList[i].mass,stagesList[i].amountOfFuel,
                  graphType)
-            
             color=stagesList[i].stageColor
-            print(str(color))
             #Call the math function and return the plots
-            a=plt.plot(xvalues,yvalues)
+            a=plt.plot(xvals,yvals)
             plt.setp(a, color=color, linewidth=2.0)
         plt.ylabel(y_AxisLable)
         plt.xlabel(x_AxisLable)
@@ -251,7 +240,7 @@ class stageingFrame(tk.Frame):
         #Graph config headding
         lable_graphOptions=tk.Label(controller, text="Graph config",fg ="#737373",bg ="White",font=headdingfont)
         lable_graphOptions.place(x=(controller.winfo_screenwidth()/2)-150,y=330)
-        #Graph type labe
+        #Graph type lable
         lable_graphType=tk.Label(controller, text="Graph type",fg ="#8c8c8c",bg ="White",font=MainFont)
         lable_graphType.place(x=controller.winfo_screenwidth()/4+150,y=350)
         #Save graph button
@@ -277,7 +266,7 @@ class stageingFrame(tk.Frame):
         def launch(event):
             graphType=currentGraphType.get()
             print(graphType)
-            graphFrame.updateGraph(TrajectoryGrapher,controller,graphType)
+            graphFrame.updateGraph(graphFrame,controller,graphType)
             
             
        
