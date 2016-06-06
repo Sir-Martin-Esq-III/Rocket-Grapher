@@ -63,9 +63,9 @@ class graphFrame(tk.Frame):
          engineThrust,burnTime,
          mass,fuel,
          graphType):
-        #Need to allocate 36 locations so the rocket can land  Could replace with None?
-        xvalues= [0] * 36
-        yvalues= [0] * 36
+#Change this to 36
+        xvalues= [None] * 18
+        yvalues= [None] * 18
         global x_AxisLable
         global y_AxisLable
     
@@ -77,7 +77,6 @@ class graphFrame(tk.Frame):
         global lastYVel
         Xcomp=velocity*(cos(radians(angle)))#cos
         Ycomp=velocity*(sin(radians(angle)))#sin
-        #time for the stage to complete the launch (and land)
         time=(2*Ycomp)/gravity
         maxHorizDisp=time*Xcomp
         maxVertDisp=(-(Ycomp**2)/(2*-gravity))
@@ -96,56 +95,48 @@ class graphFrame(tk.Frame):
         elif graphType=="XDisplacement-YDisplacement":
             x_AxisLable="X-Displacement(m)"
             y_AxisLable="y-Displacement(m)"
-            for z in range(0,36):
-            #TODO:replace time with burn time 
-             updateTime=(time*(z/35))
-             if (updateTime>time/2) and (stageNumber!=len(stagesList)-1):
-                 for item in range(0,len(xvalues)-1):
-                    if xvalues[len(xvalues)-1-item]!=0:
-                        print(item)
-                        lastXVel= xvalues[len(xvalues)-1-item]
-                 for item in range(0,len(yvalues)-1):
-                    if xvalues[len(yvalues)-1-item]!=0:
-                        print(item)
-                        lastYVel= yvalues[len(yvalues)-1-item]
+            for i in range(0,36):
+             updateTime=(time*(i/35))
+             if updateTime>time/2:
+                 lastXVel=xvalues[len(xvalues)-1]
+                 lastYVel=yvalues[len(yvalues)-1]
                  break
              else:
-                     yvalues[z]=((Ycomp+lastYVel)*updateTime)+((-1/2*gravity)*(updateTime*updateTime))
-                     xvalues[z]=updateTime*(Xcomp+lastXVel)
+                 #Check for graph type
+                 if stageNumber!=0:
+                     yvalues[i]=((lastYVel)+(Ycomp*updateTime)+((-1/2*gravity)*(updateTime*updateTime)))
+                     xvalues[i]=((lastXVel)+(updateTime*Xcomp))
+                 else:
+                     yvalues[i]=((Ycomp*updateTime)+((-1/2*gravity)*(updateTime*updateTime)))
+                     xvalues[i]=(updateTime*Xcomp) 
 
         elif graphType=="XVelocity-YVelocity":
             x_AxisLable=""
             y_AxisLable=""
-
-        print(lastXVel,lastYVel)
         return(xvalues,yvalues)
         
     #Need to find a way to not have to create a new figure everytime. It limits the program to 20 laucnhes Create a graph class and destroy the instance of the class when we create a new graph?
 
     def updateGraph(self,controller,graphType):  
         #Just for now. I can not be bothered to trace the error 
-        try:
-             f = plt.figure(figsize=(4,5), dpi=100,frameon=False,tight_layout=True)
-             #Calls the math function for every stage that the user has created
-             for i in range(len(stagesList)):
-                 # Checks what  graph the user wants and then finds 
-                 xvals,yvals=self.getPlots(stagesList[i].angle,stagesList[i].stageNumber,
-                      stagesList[i].thrust,stagesList[i].burnTime,
-                      stagesList[i].mass,stagesList[i].amountOfFuel,
-                      graphType)
-                 color=stagesList[i].stageColor
-                 #Call the math function and return the plots
-                 a=plt.plot(xvals,yvals)
-             plt.setp(a, color=color, linewidth=2.0)
-             plt.ylabel(y_AxisLable)
-             plt.xlabel(x_AxisLable)
-             canvas = FigureCanvasTkAgg(f, Controller)
-             canvas._tkcanvas.config(highlightthickness=0)
-             canvas.show()
-             canvas.get_tk_widget().place(x=0,y=0)
-        except ValueError:
-                print("This is not a valid color")
-                return(0)
+       f = plt.figure(figsize=(4,5), dpi=100,frameon=False,tight_layout=True)
+       #Calls the math function for every stage that the user has created
+       for i in range(len(stagesList)):
+           # Checks what  graph the user wants and then finds 
+           xvals,yvals=self.getPlots(stagesList[i].angle,stagesList[i].stageNumber,
+                stagesList[i].thrust,stagesList[i].burnTime,
+                stagesList[i].mass,stagesList[i].amountOfFuel,
+                graphType)
+           color=stagesList[i].stageColor
+           #Call the math function and return the plots
+           a=plt.plot(xvals,yvals)
+           plt.setp(a, color=color, linewidth=2.0)
+       plt.ylabel(y_AxisLable)
+       plt.xlabel(x_AxisLable)
+       canvas = FigureCanvasTkAgg(f, Controller)
+       canvas._tkcanvas.config(highlightthickness=0)
+       canvas.show()
+       canvas.get_tk_widget().place(x=0,y=0)
 """
 This would mean that we could just remove the current class instance
 class graph
