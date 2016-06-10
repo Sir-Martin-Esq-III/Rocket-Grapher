@@ -112,11 +112,11 @@ class stageFrame:
 
         #Adds a stage to the rocket
         addStageButton=Button(stageFrame.newFrame,text="+ Stage",fg ="#E24A33 ",relief=FLAT,bg="#E5E5E5",font=MainFont)
-        addStageButton.place(x=400,y=20)
+        addStageButton.place(x=240,y=20)
         #addStageButton.bind("<Button-1>",lambda event:changeStageState(event,"Add"))
         #Save the values for the current stage
         saveStageButton=Button(stageFrame.newFrame,text="Save Stage",fg ="#E24A33 ",relief=FLAT,bg="#E5E5E5",font=MainFont)
-        saveStageButton.place(x=400,y=260)
+        saveStageButton.place(x=240,y=260)
        # saveStageButton.bind("<Button-1>",lambda event:saveStage(event))
         
         #Cycles to the stage before the current one current stage=0 then don't show
@@ -165,7 +165,7 @@ class graphFrame:
         self.create(number)
         
     def create(self,number):
-        graphFrame.newFrame=Frame(height=height,width=width)
+        graphFrame.newFrame=Frame(height=height,width=width/2)
         if number==0:
             x=0
             y=0
@@ -175,10 +175,10 @@ class graphFrame:
         #Create the frame
         graphFrame.newFrame.place(x=x,y=y)
         #Begin graph creation
-        figure = plt.figure(figsize=(4,5), dpi=100,frameon=False,tight_layout=True)
+        figure = plt.figure(figsize=(2,2), dpi=100,frameon=False,tight_layout=True)
         plt.plot()
         canvas = FigureCanvasTkAgg(figure, graphFrame.newFrame)
-       # canvas._tkcanvas.config(highlightthickness=0)
+        canvas._tkcanvas.config(highlightthickness=0)
         canvas.show()
         canvas.get_tk_widget().place(x=0,y=0)
 
@@ -194,8 +194,7 @@ class graphFrame:
 
         
 def newFrame(event,Type,number):
-    if StageFrames[number]!= None:
-        Destroyer(event, number)
+    Destroyer(event, number)
     if Type=="Input":
         StageFrames[number]=stageFrame(number)
     else:
@@ -210,46 +209,11 @@ def Destroyer(event,number):
     StageFrames[number]=None
     print("Frame destroyed",StageFrames)
 
-#Input buttons
-launchButton1=Button(root,text="ADD 1",fg ="#E24A33 ",relief=FLAT,bg="#E5E5E5")
-launchButton1.place(x=0,y=150)
-launchButton1.bind("<1>",lambda event:newFrame(event,"Input",0))
 
-launchButton2=Button(root,text="ADD 2",fg ="#E24A33 ",relief=FLAT,bg="#E5E5E5")
-launchButton2.place(x=0,y=250)
-launchButton2.bind("<1>",lambda event:newFrame(event,"Input",1))
-
-launchButton3=Button(root,text="DSET 1",fg ="#E24A33 ",relief=FLAT,bg="#E5E5E5")
-launchButton3.place(x=0,y=200)
-launchButton3.bind("<1>",lambda event:Destroyer(event,0))
-
-launchButton4=Button(root,text="DSET 2",fg ="#E24A33 ",relief=FLAT,bg="#E5E5E5")
-launchButton4.place(x=0,y=300)
-launchButton4.bind("<1>",lambda event:Destroyer(event,1))
-
-#Graph buttons
-launchButton5=Button(root,text="ADD G 1",fg ="#E24A33 ",relief=FLAT,bg="#E5E5E5")
-launchButton5.place(x=0,y=350)
-launchButton5.bind("<1>",lambda event:newFrame(event,"Graph",0))
-
-launchButton6=Button(root,text="ADD G 2",fg ="#E24A33 ",relief=FLAT,bg="#E5E5E5")
-launchButton6.place(x=0,y=400)
-launchButton6.bind("<1>",lambda event:newFrame(event,"Graph",1))
-
-launchButton7=Button(root,text="DSET G 1",fg ="#E24A33 ",relief=FLAT,bg="#E5E5E5")
-launchButton7.place(x=0,y=450)
-launchButton7.bind("<1>",lambda event:Destroyer(event,0))
-
-launchButton8=Button(root,text="DSET G 2",fg ="#E24A33 ",relief=FLAT,bg="#E5E5E5")
-launchButton8.place(x=0,y=500)
-launchButton8.bind("<1>",lambda event:Destroyer(event,1))
 
 def init():
     newFrame(None,"Input",0)
     newFrame(None,"Input",1)
 
 init()
-
-
-
 root.mainloop()
