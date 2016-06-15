@@ -35,28 +35,23 @@ class stageFrame:
 
     #Class which has all of the variables for each stage
     class Stages:
-        stageNumber=None
         mass=None
         angle=None
         thrust=None
         amountOfFuel=None
         burnTime=None
         stageColor=None
-        def __init__(self,number):
-           self.stageNumber=number
-           
 
-    
-       
     def __init__(self,sideNumber):
+    
         #This is so that there is a stage on INIT (so shit don't burn to the ground)
         if sideNumber==0:
             if len(r0StagesList)==0:
-                startStage=self.Stages(0)
+                startStage=self.Stages()
                 r0StagesList.append(startStage)
         else:
            if len(r1StagesList)==0:
-            startStage=self.Stages(0)
+            startStage=self.Stages()
             r1StagesList.append(startStage)
 
         #Updates the color box 
@@ -93,12 +88,12 @@ class stageFrame:
             if option=="Add":
                 if sideNumber==0:
                     self.r0currentStageNumber =len(r0StagesList)
-                    currentStage=self.Stages(self.r0currentStageNumber)
+                    currentStage=self.Stages()
                     r0StagesList.append(currentStage)
                     print("Last stage added %i to rocket%i" %(self.r0currentStageNumber,sideNumber))
                 else:
                     self.r1currentStageNumber =len(r1StagesList)
-                    currentStage=self.Stages(self.r1currentStageNumber)
+                    currentStage=self.Stages()
                     r1StagesList.append(currentStage)
                     print("Last stage added %i to rocket%i" %(self.r1currentStageNumber,sideNumber))
                 
@@ -200,7 +195,7 @@ class stageFrame:
 
         #Adds a stage to the rocket
         addStageButton=Button(self.newframe,text="+ Stage",fg ="#E24A33 ",relief=FLAT,bg="#E5E5E5",font=self.mainFont)
-        addStageButton.place(x=(width/2)-75,y=20)
+        addStageButton.place(x=(width/2)-100,y=20)
         addStageButton.bind("<Button-1>",lambda event:changeStageState(event,"Add"))
         #Save the values for the current stage
         saveStageButton=Button(self.newframe,text="Save Stage",fg ="#E24A33 ",relief=FLAT,bg="#E5E5E5",font=self.mainFont)
@@ -224,7 +219,8 @@ class stageFrame:
         lable_graphType.place(x=0,y=350)
         #Save graph button
         launchButton=Button(self.newframe,text="Launch",fg ="#E24A33 ",relief=FLAT,bg="#E5E5E5",font=self.mainFont)
-        launchButton.place(x=0,y=480)
+        launchButton.place(x=0,y=height-50
+)
         launchButton.bind("<Button-1>",lambda event:changeFrame(event,"Graph",sideNumber))#Bind to the function "launch"
 
         currentGraphType=StringVar()
@@ -258,8 +254,7 @@ class graphFrame:
         xValues=list()
         yValues=list()
         gravity=9.81
-        #Resolving the vector into v/h components
-        
+        #Resolving the vector into v/h components 
         verticalComponent=velocity*(sin(radians(angle)))
         horizontalComponent=velocity*(cos(radians(angle)))
         #Finds Time/max horizontal displacement/ max vertical displacement 
@@ -281,23 +276,18 @@ class graphFrame:
             x=width/2
         #Create the frame
         self.newFrame.place(x=x,y=0)
-        widthInches= root.winfo_screenwidth() / root.winfo_fpixels('1i')
-        heightInches= root.winfo_screenheight() / root.winfo_fpixels('1i')
-        print(widthInches/4,heightInches/4)
         #Begin graph creation
-        figure = plt.figure(figsize=(((widthInches/4)-.2),(heightInches/2)-.2), dpi=100,frameon=False,tight_layout=True)
-        velocity=self.vel
+        figure = plt.figure(figsize=(4,5), dpi=100,frameon=False,tight_layout=True)
         if sideNumber==0:
             for i in range(len(r0StagesList)):
                 angle=r0StagesList[i].angle
-                self.xplot,self.yplot= self.getPlots(angle,velocity)
+                self.xplot,self.yplot= self.getPlots(angle,self.vel)
                 color=r0StagesList[i].stageColor
                 a0=plt.plot(self.xplot,self.yplot)
                 plt.setp(a0, color=color, linewidth=2.0)
         else:
                for i in range(len(r1StagesList)):
-                angle=r1StagesList[i].angle
-                self.xplot,self.yplot= self.getPlots(angle,velocity)
+                self.xplot,self.yplot= self.getPlots(r1StagesList[i].angle,self.vel)
                 color=r1StagesList[i].stageColor
                 a1=plt.plot(self.xplot,self.yplot)
                 plt.setp(a1, color=color, linewidth=2.0)
