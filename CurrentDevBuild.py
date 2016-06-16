@@ -1,3 +1,7 @@
+"""
+
+"""
+
 from tkinter import *
 from math import *
 import matplotlib
@@ -276,8 +280,11 @@ class graphFrame:
             x=width/2
         #Create the frame
         self.newFrame.place(x=x,y=0)
+        widthInches= root.winfo_screenwidth() / root.winfo_fpixels('1i')
+        heightInches= root.winfo_screenheight() / root.winfo_fpixels('1i')
+        print(widthInches/4,heightInches/4)
         #Begin graph creation
-        figure = plt.figure(figsize=(4,5), dpi=100,frameon=False,tight_layout=True)
+        figure = plt.figure(figsize=(((widthInches/4)-.2),(heightInches/2)-.2), dpi=100,frameon=False,tight_layout=True)
         if sideNumber==0:
             for i in range(len(r0StagesList)):
                 angle=r0StagesList[i].angle
@@ -314,7 +321,6 @@ class graphFrame:
 """ChangeFrame(Event: tkEvent-- Has to be passed when the user inputs something from a .bind function
                FrameType: String--"Input"= use instantiate inputStage,"Graph"= use instantiate graphStage,
                SideNumber: Integer--0=left, 1=right)  
-
 Is called when the frame needs to be changed to show a graph/input field
 """
 def changeFrame(event,Type,sideNumber):
@@ -327,7 +333,6 @@ def changeFrame(event,Type,sideNumber):
 
 """Destroyer(Event: tkEvent-- Has to be passed when the user inputs something from a .bind function
             SideNumber: Integer--0=left, 1=right)  
-
 Is called when a frame needs to be destroyed.
 """ 
 def Destroyer(event,sideNumber):
