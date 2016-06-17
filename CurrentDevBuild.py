@@ -231,8 +231,12 @@ class stageFrame:
         #Launch button
         launchButton=Button(self.newframe,text="Launch",fg ="#E24A33 ",relief=FLAT,bg="#E5E5E5",font=self.mainFont)
         launchButton.place(x=0,y=height-50)
-        launchButton.bind("<Button-1>",lambda event:changeFrame(event,"Graph",sideNumber))#Bind to the function "launch"
+        launchButton.bind("<Button-1>",lambda event:launch(event))#Bind to the function "launch"
 
+        def launch(event):
+            graphType=str(currentGraphType.get())
+            changeFrame(event,"Graph",sideNumber,graphType)
+            
         #This is so when we graph->input it loads current stage
         changeStageState(None,"None")
  
@@ -251,25 +255,70 @@ class graphFrame:
     vel=10 #temp
     xplot=0
     yplot=0
+    stagesListUsed=None
+    lastX=0
+    lastY=0
 
-    def getPlots(self,angle,velocity):
+    def getPlots(self,totalMass,angle,engineThrust,amountOfFuel,burnTime,graphType):
         xValues=list()
         yValues=list()
-        gravity=9.81
+        g=9.81
         #Resolving the vector into v/h components 
-        verticalComponent=velocity*(sin(radians(angle)))
-        horizontalComponent=velocity*(cos(radians(angle)))
-        #Finds Time/max horizontal displacement/ max vertical displacement 
-        time=(2*verticalComponent)/gravity
-        maxHorizDisp=time*horizontalComponent
-        maxVertDisp=(-(verticalComponent**2)/(2*-gravity))
+        verticalForce=engineThrust*(sin(radians(angle)))
+        horizontalForce=engineThrust*(cos(radians(angle)))
+        #Net Forces
+        netVForce=verticalForce-(totalMass*g)#Upthrust-weight
+        #Acceleration
+        verticalAcc=(netVForce/totalMass)+self.lastY# A=F/M
+        horizontalAcc=(horizontalForce/totalMass)+self.lastX
         for i in range(0,36):
-            updateTime=(time*(i/35))
-            yValues.append((verticalComponent*updateTime)+((-1/2*gravity)*(updateTime*updateTime)))
-            xValues.append(updateTime*horizontalComponent) 
+            updateTime=(burnTime*(i/35))
+            amountOfFuel-=10
+            #Velocity
+            print("Last y",self.lastY,"Last x",self.lastX)
+            verticalVel=(verticalAcc*updateTime)# V=AT+u
+            horizontalVel=(horizontalAcc*updateTime)
+            
+            print("Vv ",verticalVel,"Vh ",horizontalVel)
+            print(graphType)
+            if verticalVel<0 or (amountOfFuel<0):
+                self.lastX=horizontalVel
+                self.lastY=verticalVel
+                break
+            if graphType=="('Displacement-Time',)":
+                print("D-T graph")
+                yValues.append((verticalVel**2-self.lastY**2)/(2*g))
+                xValues.append(horizontalVel*updateTime)
+            elif graphType=="('Velocity-Time',)":
+                print("V-T graph")
+            elif graphType=="('XDisplacement-YDisplacement',)":
+                print("XD-YD graph")
+            elif graphType=="('XVelocity-YVelocity',)":
+                print("XV-YV graph")
+        self.lastX=horizontalVel
+        self.lastY=verticalVel
         return(xValues,yValues)
+
+        """
+        for i in range(0,36):
+            updateTime=(burnTime*(i/35))
+            yVelocity=(updateTime*verticalAcc)+self.lastY
+            #print(yVelocity)
+            xVelocity=(updateTime*horizontalAcc)+self.lastX
+            #print(xVelocity)
+            yDisplacement=(yVelocity**2-(self.lastY**2))/2*verticalAcc
+            xDisplacement=xVelocity*updateTime
+            if(yDisplacement<0)or(xDisplacement<0):
+                yValues.append(0)
+                xValues.append(0)
+                return(xValues,yValues)
+            yValues.append(yDisplacement)
+            xValues.append(xDisplacement)
+            """
         
-    def __init__(self,sideNumber):
+        
+    def __init__(self,sideNumber,graphType):
+        #totalMass=0
         self.newFrame=Frame(height=height,width=width/2)
         self.newFrame.config(bg ="white")
         if sideNumber==0:
@@ -280,23 +329,28 @@ class graphFrame:
         self.newFrame.place(x=x,y=0)
         widthInches= root.winfo_screenwidth() / root.winfo_fpixels('1i')
         heightInches= root.winfo_screenheight() / root.winfo_fpixels('1i')
-        print(widthInches/4,heightInches/4)
         #Begin graph creation
-        figure = plt.figure(figsize=(((widthInches/4)-.2),(heightInches/2)-.2), dpi=100,frameon=False,tight_layout=True)
+        figure = plt.figure(figsize=(((widthInches/4)-.2),(heightInches/2)-.2), dpi=100,frameon=False,tight_layout=True)        
         if sideNumber==0:
-            for i in range(len(r0StagesList)):
-                #get all of the 
-                angle=r0StagesList[i].angle
-                self.xplot,self.yplot= self.getPlots(angle,self.vel)
-                color=r0StagesList[i].stageColor
-                a0=plt.plot(self.xplot,self.yplot)
-                plt.setp(a0, color=color, linewidth=2.0)
+            stagesListUsed=r0StagesList
         else:
-               for i in range(len(r1StagesList)):
-                self.xplot,self.yplot= self.getPlots(r1StagesList[i].angle,self.vel)
-                color=r1StagesList[i].stageColor
-                a1=plt.plot(self.xplot,self.yplot)
-                plt.setp(a1, color=color, linewidth=2.0)
+            stagesListUsed=r1StagesList
+        for i in range(len(stagesListUsed)):
+# should I move this get plots()?
+            totalMass=0
+            #Find the total mass of the rocket
+            for Mass in range(i,len(stagesListUsed)):
+                totalMass+=stagesListUsed[Mass].mass
+            #Get all of the values for all of the inputs    
+            angle=stagesListUsed[i].angle
+            engineThrust=stagesListUsed[i].thrust
+            amountOfFuel=stagesListUsed[i].amountOfFuel
+            burnTime=stagesListUsed[i].burnTime
+            #print("Mass",totalMass,"\n""angle",angle,"\n","EngineThrust",engineThrust,"\n","#Fuel",amountOfFuel,"\n","burnTime",burnTime,"\n")
+            self.xplot,self.yplot= self.getPlots(totalMass,angle,engineThrust,amountOfFuel,burnTime,str(graphType))
+            color=stagesListUsed[i].stageColor
+            a0=plt.plot(self.xplot,self.yplot)
+            plt.setp(a0, color=color, linewidth=2.0)
 
         plt.ylabel("Y AXIS")
         plt.xlabel("X AXIS")
@@ -307,7 +361,7 @@ class graphFrame:
         
 
         launchButton3=Button(self.newFrame,text="Return to input",fg ="#E24A33 ",relief=FLAT,bg="#E5E5E5")
-        launchButton3.place(x=0,y=0)
+        launchButton3.place(x=200,y=0)
         launchButton3.bind("<1>",lambda event:changeFrame(event,"Input",sideNumber))
         
     #Destroys the frame
@@ -322,12 +376,12 @@ class graphFrame:
                SideNumber: Integer--0=left, 1=right)  
 Is called when the frame needs to be changed to show a graph/input field
 """
-def changeFrame(event,Type,sideNumber):
+def changeFrame(event,Type,sideNumber,*args):
     Destroyer(event, sideNumber)
     if Type=="Input":
         sideFrames[sideNumber]=stageFrame(sideNumber)
     else:
-        sideFrames[sideNumber]=graphFrame(sideNumber)
+        sideFrames[sideNumber]=graphFrame(sideNumber,args)
     print("Frame added: %s on side %i"%(str(sideFrames[sideNumber]),sideNumber))
 
 """Destroyer(Event: tkEvent-- Has to be passed when the user inputs something from a .bind function
