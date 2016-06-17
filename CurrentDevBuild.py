@@ -1,7 +1,3 @@
-"""
-
-"""
-
 from tkinter import *
 from math import *
 import matplotlib
@@ -186,6 +182,7 @@ class stageFrame:
         lable_burnTime.place(x=0,y=200)
         Entry_burnTime=Entry(self.newframe, textvariable=burnTime,fg ="#E24A33 ",bg ="#E5E5E5",relief=FLAT)
         Entry_burnTime.place(x=0,y=220)    
+
         #Color widgets(canvas,Lable&Entry)
         stageColor=StringVar()
         stageColor.set("#")
@@ -216,25 +213,26 @@ class stageFrame:
         cycleStageRight.place(x=(width/4)+60,y=20)
         cycleStageRight.bind("<Button-1>",lambda event:changeStageState(event,"Right"))
 
-        lable_graphOptions=Label(self.newframe, text="Graph config",fg ="#737373",bg ="White",font=self.mainFont)
+        lable_graphOptions=Label(self.newframe, text="Graph type",fg ="#737373",bg ="White",font=self.mainFont)
         lable_graphOptions.place(x=0,y=330)
-        #Graph type lable
+        #Graph widgets
         lable_graphType=Label(self.newframe, text="Graph type",fg ="#8c8c8c",bg ="White",font=self.mainFont)
         lable_graphType.place(x=0,y=350)
-        #Save graph button
-        launchButton=Button(self.newframe,text="Launch",fg ="#E24A33 ",relief=FLAT,bg="#E5E5E5",font=self.mainFont)
-        launchButton.place(x=0,y=height-50
-)
-        launchButton.bind("<Button-1>",lambda event:changeFrame(event,"Graph",sideNumber))#Bind to the function "launch"
-
+        
         currentGraphType=StringVar()
-        currentGraphType.set("Graph type") #default value
+        currentGraphType.set("Displacement-Time") #default value
         graphTypes=["Displacement-Time",
                     "Velocity-Time",
                     "XDisplacement-YDisplacement",
                     "XVelocity-YVelocity"]
         w =  OptionMenu(self.newframe, currentGraphType , *graphTypes)
         w.place(x=0,y=350)
+
+        #Launch button
+        launchButton=Button(self.newframe,text="Launch",fg ="#E24A33 ",relief=FLAT,bg="#E5E5E5",font=self.mainFont)
+        launchButton.place(x=0,y=height-50)
+        launchButton.bind("<Button-1>",lambda event:changeFrame(event,"Graph",sideNumber))#Bind to the function "launch"
+
         #This is so when we graph->input it loads current stage
         changeStageState(None,"None")
  
@@ -287,6 +285,7 @@ class graphFrame:
         figure = plt.figure(figsize=(((widthInches/4)-.2),(heightInches/2)-.2), dpi=100,frameon=False,tight_layout=True)
         if sideNumber==0:
             for i in range(len(r0StagesList)):
+                #get all of the 
                 angle=r0StagesList[i].angle
                 self.xplot,self.yplot= self.getPlots(angle,self.vel)
                 color=r0StagesList[i].stageColor
