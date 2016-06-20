@@ -262,7 +262,10 @@ class graphFrame:
     def getPlots(self,totalMass,angle,engineThrust,amountOfFuel,burnTime,graphType):
         xValues=list()
         yValues=list()
+        xAxis=""
+        yAxis=""
         g=9.81
+        print(self.lastY)
         #Resolving the vector into v/h components 
         verticalForce=engineThrust*(sin(radians(angle)))
         horizontalForce=engineThrust*(cos(radians(angle)))
@@ -273,32 +276,46 @@ class graphFrame:
         horizontalAcc=(horizontalForce/totalMass)+self.lastX
         for i in range(0,36):
             updateTime=(burnTime*(i/35))
+            print(i)
             amountOfFuel-=10
-            #Velocity
-            print("Last y",self.lastY,"Last x",self.lastX)
-            verticalVel=(verticalAcc*updateTime)# V=AT+u
-            horizontalVel=(horizontalAcc*updateTime)
-            
-            print("Vv ",verticalVel,"Vh ",horizontalVel)
-            print(graphType)
-            if verticalVel<0 or (amountOfFuel<0):
+            if (amountOfFuel<0):
+                #Burn stops              
+                print("verticalVel<0 or (amountOfFuel<0)")
                 self.lastX=horizontalVel
                 self.lastY=verticalVel
-                break
+                #break
+            #Velocity
+            #print("Last y",self.lastY,"Last x",self.lastX)
+            verticalVel=(verticalAcc*updateTime)# V=AT+u
+            horizontalVel=(horizontalAcc*updateTime)
+            print(updateTime)
+            #print("Vv ",verticalVel,"Vh ",horizontalVel)
+            #print(graphType)
+            
             if graphType=="('Displacement-Time',)":
-                print("D-T graph")
+                yValues.append((verticalVel**2-self.lastY**2)/(2*g))
+                xValues.append(updateTime)
+                xAxis="Time"
+                yAxis="Vertical displacement"
+            elif graphType=="('Velocity-Time',)":
+                yValues.append(verticalVel)
+                xValues.append(updateTime)
+                xAxis="Time"
+                yAxis="Vertical velocity"
+            elif graphType=="('XDisplacement-YDisplacement',)":
                 yValues.append((verticalVel**2-self.lastY**2)/(2*g))
                 xValues.append(horizontalVel*updateTime)
-            elif graphType=="('Velocity-Time',)":
-                print("V-T graph")
-            elif graphType=="('XDisplacement-YDisplacement',)":
-                print("XD-YD graph")
+                xAxis="Horizontal displacement"
+                yAxis="Vertical displacement"
             elif graphType=="('XVelocity-YVelocity',)":
-                print("XV-YV graph")
+                yValues.append(verticalVel)
+                xValues.append(horizontalVel)
+                xAxis="Horizontal velocity"
+                yAxis="Vertical velocity"
+
         self.lastX=horizontalVel
         self.lastY=verticalVel
-        return(xValues,yValues)
-
+        return(xValues,yValues,xAxis,yAxis)
         """
         for i in range(0,36):
             updateTime=(burnTime*(i/35))
@@ -318,7 +335,8 @@ class graphFrame:
         
         
     def __init__(self,sideNumber,graphType):
-        #totalMass=0
+        xAxisText=""
+        yAxisText=""
         self.newFrame=Frame(height=height,width=width/2)
         self.newFrame.config(bg ="white")
         if sideNumber==0:
@@ -347,13 +365,13 @@ class graphFrame:
             amountOfFuel=stagesListUsed[i].amountOfFuel
             burnTime=stagesListUsed[i].burnTime
             #print("Mass",totalMass,"\n""angle",angle,"\n","EngineThrust",engineThrust,"\n","#Fuel",amountOfFuel,"\n","burnTime",burnTime,"\n")
-            self.xplot,self.yplot= self.getPlots(totalMass,angle,engineThrust,amountOfFuel,burnTime,str(graphType))
+            self.xplot,self.yplot,xAxisText,yAxisText= self.getPlots(totalMass,angle,engineThrust,amountOfFuel,burnTime,str(graphType))
             color=stagesListUsed[i].stageColor
             a0=plt.plot(self.xplot,self.yplot)
             plt.setp(a0, color=color, linewidth=2.0)
 
-        plt.ylabel("Y AXIS")
-        plt.xlabel("X AXIS")
+        plt.ylabel(yAxisText)
+        plt.xlabel(xAxisText)
         canvas = FigureCanvasTkAgg(figure, self.newFrame)
         canvas._tkcanvas.config(highlightthickness=0,background="white")
         canvas.show()
