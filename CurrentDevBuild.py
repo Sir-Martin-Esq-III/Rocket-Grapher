@@ -258,6 +258,7 @@ class graphFrame:
     stagesListUsed=None
     lastX=0
     lastY=0
+    totalTime=0
 
     def getPlots(self,totalMass,angle,engineThrust,amountOfFuel,burnTime,graphType):
         xValues=list()
@@ -265,74 +266,58 @@ class graphFrame:
         xAxis=""
         yAxis=""
         g=9.81
-        print(self.lastY)
+        #print(self.lastY)
         #Resolving the vector into v/h components 
         verticalForce=engineThrust*(sin(radians(angle)))
         horizontalForce=engineThrust*(cos(radians(angle)))
         #Net Forces
         netVForce=verticalForce-(totalMass*g)#Upthrust-weight
         #Acceleration
-        verticalAcc=(netVForce/totalMass)+self.lastY# A=F/M
-        horizontalAcc=(horizontalForce/totalMass)+self.lastX
+        verticalAcc=(netVForce/totalMass)#A=F/M
+        horizontalAcc=(horizontalForce/totalMass)
         for i in range(0,36):
-            updateTime=(burnTime*(i/35))
-            print(i)
+            updateTime=(burnTime*(i/35))+self.totalTime
             amountOfFuel-=10
             if (amountOfFuel<0):
                 #Burn stops              
                 print("verticalVel<0 or (amountOfFuel<0)")
-                self.lastX=horizontalVel
-                self.lastY=verticalVel
+                #verticalVel+= g*(updateTime-burnTime*(i-1/35))/self.lastY V=(g*t)/u
+                #self.lastX=horizontalVel
+                #self.lastY=verticalVel
                 #break
             #Velocity
             #print("Last y",self.lastY,"Last x",self.lastX)
             verticalVel=(verticalAcc*updateTime)# V=AT+u
             horizontalVel=(horizontalAcc*updateTime)
-            print(updateTime)
-            #print("Vv ",verticalVel,"Vh ",horizontalVel)
+            #print(updateTime)
+            print("Vv ",verticalVel,"Vh ",horizontalVel)
             #print(graphType)
             
             if graphType=="('Displacement-Time',)":
-                yValues.append((verticalVel**2-self.lastY**2)/(2*g))
+                yValues.append(((verticalVel**2)/(2*g))+self.lastY)#v^2=u^2+2as
                 xValues.append(updateTime)
                 xAxis="Time"
                 yAxis="Vertical displacement"
             elif graphType=="('Velocity-Time',)":
-                yValues.append(verticalVel)
+                yValues.append(verticalVel+self.lastY)
                 xValues.append(updateTime)
                 xAxis="Time"
                 yAxis="Vertical velocity"
             elif graphType=="('XDisplacement-YDisplacement',)":
-                yValues.append((verticalVel**2-self.lastY**2)/(2*g))
+                yValues.append((verticalVel**2)/(2*g))
                 xValues.append(horizontalVel*updateTime)
                 xAxis="Horizontal displacement"
                 yAxis="Vertical displacement"
             elif graphType=="('XVelocity-YVelocity',)":
-                yValues.append(verticalVel)
-                xValues.append(horizontalVel)
+                yValues.append(verticalVel+self.lastY)
+                xValues.append(horizontalVel+self.lastX)
                 xAxis="Horizontal velocity"
                 yAxis="Vertical velocity"
-
-        self.lastX=horizontalVel
         self.lastY=verticalVel
+        self.lastX=horizontalVel
+        self.totalTime=updateTime
+        print("LAST Y",self.lastY,"LAST X",self.lastX)
         return(xValues,yValues,xAxis,yAxis)
-        """
-        for i in range(0,36):
-            updateTime=(burnTime*(i/35))
-            yVelocity=(updateTime*verticalAcc)+self.lastY
-            #print(yVelocity)
-            xVelocity=(updateTime*horizontalAcc)+self.lastX
-            #print(xVelocity)
-            yDisplacement=(yVelocity**2-(self.lastY**2))/2*verticalAcc
-            xDisplacement=xVelocity*updateTime
-            if(yDisplacement<0)or(xDisplacement<0):
-                yValues.append(0)
-                xValues.append(0)
-                return(xValues,yValues)
-            yValues.append(yDisplacement)
-            xValues.append(xDisplacement)
-            """
-        
         
     def __init__(self,sideNumber,graphType):
         xAxisText=""
@@ -379,7 +364,7 @@ class graphFrame:
         
 
         launchButton3=Button(self.newFrame,text="Return to input",fg ="#E24A33 ",relief=FLAT,bg="#E5E5E5")
-        launchButton3.place(x=200,y=0)
+        launchButton3.place(x=(width/2)-125,y=0)
         launchButton3.bind("<1>",lambda event:changeFrame(event,"Input",sideNumber))
         
     #Destroys the frame
