@@ -5,8 +5,6 @@ The rocket acts only on the X-Y plane and (for now) only uses the simple kinemat
 
 What I plan to add:
 
-  *Animated graphs
-
   *Complex physics 
 
   *Different stages
