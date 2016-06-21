@@ -5,7 +5,6 @@ matplotlib.use('TkAgg')
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.pyplot as plt
 from matplotlib import style
-from matplotlib import animation
 
 
 sideFrames=[None,None]
@@ -18,7 +17,6 @@ width=root.winfo_screenwidth()/2
 height=root.winfo_screenheight()/2
 root.title("Rocket Science 9000")
 root.geometry("%dx%d+%d+%d" %(width,height,width/2,height/2))
-#root.config(background = 'white')
 root.resizable(False,False)
 
 #StageFrame
@@ -43,8 +41,7 @@ class stageFrame:
         stageColor=None
 
     def __init__(self,sideNumber):
-    
-        #This is so that there is a stage on INIT (so shit don't burn to the ground)
+        #This makes sure that there is a stage on INIT 
         if sideNumber==0:
             if len(r0StagesList)==0:
                 startStage=self.Stages()
@@ -54,7 +51,7 @@ class stageFrame:
             startStage=self.Stages()
             r1StagesList.append(startStage)
 
-        #Updates the color box 
+        #Updates the widget which show the stage color 
         def updateColorBox(event):
             try:
                 colorBox.config(bg=Entry_stageColor.get())
@@ -82,9 +79,9 @@ class stageFrame:
                     r1StagesList[self.r1currentStageNumber].stageColor=str(Entry_stageColor.get())
             except ValueError:
                 print("An error occoured causing the stage not to save")
-        #Changes the current stage
+        #Changes the current stage state
         def changeStageState(event,option):
-             #Add a stage. Does this by increaseing the stageNumber, createing a class instance of "Stages" and then appending that instance to and array
+            #Add a stage
             if option=="Add":
                 if sideNumber==0:
                     self.r0currentStageNumber =len(r0StagesList)
@@ -128,6 +125,7 @@ class stageFrame:
             burnTime.set(str(currentStage.burnTime))
             colorBox.config(bg=currentStage.stageColor)
             stageColor.set(str(currentStage.stageColor))
+            
         #Create a new frame
         self.newframe=Frame(height=height,width=width/2)
         self.newframe.config(bg ="white")
@@ -136,8 +134,9 @@ class stageFrame:
             x=0
         else:
             x=width/2
-        #Place the new frame
+        #Place the new frame at (x,0)
         self.newframe.place(x=x,y=0)
+        
         """---BEGIN UI PLACEMENT---"""
         lable_rocketValue=Label(self.newframe,text="Rocket "+str(sideNumber),fg ="#8c8c8c",bg ="White",font=self.titleFont)
         lable_rocketValue.place(x=width/4,y=0)
@@ -178,7 +177,7 @@ class stageFrame:
 
         #Burn time widgets(Lable&Entry)
         burnTime=DoubleVar()
-        lable_burnTime=Label(self.newframe, text="Burn Time(S)",fg ="#8c8c8c",bg ="White",font=self.mainFont)     
+        lable_burnTime=Label(self.newframe, text="Time until next stage(S)",fg ="#8c8c8c",bg ="White",font=self.mainFont)     
         lable_burnTime.place(x=0,y=200)
         Entry_burnTime=Entry(self.newframe, textvariable=burnTime,fg ="#E24A33 ",bg ="#E5E5E5",relief=FLAT)
         Entry_burnTime.place(x=0,y=220)    
@@ -218,7 +217,7 @@ class stageFrame:
         #Graph widgets
         lable_graphType=Label(self.newframe, text="Graph type",fg ="#8c8c8c",bg ="White",font=self.mainFont)
         lable_graphType.place(x=0,y=350)
-        
+        #Dropdown box
         currentGraphType=StringVar()
         currentGraphType.set("Displacement-Time") #default value
         graphTypes=["Displacement-Time",
@@ -258,7 +257,6 @@ class graphFrame:
     stagesListUsed=None
     lastX=0
     lastY=0
-    totalTime=0
 
     def getPlots(self,totalMass,angle,engineThrust,amountOfFuel,burnTime,graphType):
         xValues=list()
@@ -266,7 +264,7 @@ class graphFrame:
         xAxis=""
         yAxis=""
         g=9.81
-        #print(self.lastY)
+
         #Resolving the vector into v/h components 
         verticalForce=engineThrust*(sin(radians(angle)))
         horizontalForce=engineThrust*(cos(radians(angle)))
@@ -276,38 +274,38 @@ class graphFrame:
         verticalAcc=(netVForce/totalMass)#A=F/M
         horizontalAcc=(horizontalForce/totalMass)
         for i in range(0,36):
-            updateTime=(burnTime*(i/35))+self.totalTime
+            updateTime=(burnTime*(i/35))
             amountOfFuel-=10
             if (amountOfFuel<0):
                 #Burn stops              
                 print("verticalVel<0 or (amountOfFuel<0)")
                 #verticalVel+= g*(updateTime-burnTime*(i-1/35))/self.lastY V=(g*t)/u
-                #self.lastX=horizontalVel
-                #self.lastY=verticalVel
-                #break
+                #VForce decreases
+                
             #Velocity
-            #print("Last y",self.lastY,"Last x",self.lastX)
             verticalVel=(verticalAcc*updateTime)# V=AT+u
             horizontalVel=(horizontalAcc*updateTime)
-            #print(updateTime)
-            print("Vv ",verticalVel,"Vh ",horizontalVel)
-            #print(graphType)
+            #print("Vv ",verticalVel,"Vh ",horizontalVel)
+            #print("Last y",self.lastY,"Last x",self.lastX)
             
             if graphType=="('Displacement-Time',)":
-                yValues.append(((verticalVel**2)/(2*g))+self.lastY)#v^2=u^2+2as
-                xValues.append(updateTime)
-                xAxis="Time"
-                yAxis="Vertical displacement"
+                yValues.append(0.5*(self.lastY+verticalVel)*updateTime)#s=1/2(u+v)t
+                xValues.append(updateTime)#t
+                xAxis="Time (s)"
+                yAxis="Vertical displacement (m)"
+                
             elif graphType=="('Velocity-Time',)":
                 yValues.append(verticalVel+self.lastY)
                 xValues.append(updateTime)
                 xAxis="Time"
                 yAxis="Vertical velocity"
+                
             elif graphType=="('XDisplacement-YDisplacement',)":
-                yValues.append((verticalVel**2)/(2*g))
+                yValues.append(0.5*(self.lastY+verticalVel)*updateTime)#s=1/2(u+v)t
                 xValues.append(horizontalVel*updateTime)
                 xAxis="Horizontal displacement"
                 yAxis="Vertical displacement"
+                
             elif graphType=="('XVelocity-YVelocity',)":
                 yValues.append(verticalVel+self.lastY)
                 xValues.append(horizontalVel+self.lastX)
@@ -353,7 +351,7 @@ class graphFrame:
             self.xplot,self.yplot,xAxisText,yAxisText= self.getPlots(totalMass,angle,engineThrust,amountOfFuel,burnTime,str(graphType))
             color=stagesListUsed[i].stageColor
             a0=plt.plot(self.xplot,self.yplot)
-            plt.setp(a0, color=color, linewidth=2.0)
+            plt.setp(a0, color=color, linewidth=3.0)
 
         plt.ylabel(yAxisText)
         plt.xlabel(xAxisText)
@@ -363,9 +361,9 @@ class graphFrame:
         canvas.get_tk_widget().place(x=0,y=0)
         
 
-        launchButton3=Button(self.newFrame,text="Return to input",fg ="#E24A33 ",relief=FLAT,bg="#E5E5E5")
-        launchButton3.place(x=(width/2)-125,y=0)
-        launchButton3.bind("<1>",lambda event:changeFrame(event,"Input",sideNumber))
+        returnButton=Button(self.newFrame,text="Return to input",fg ="#E24A33 ",relief=FLAT,bg="#E5E5E5")
+        returnButton.place(x=(width/2)-125,y=0)
+        returnButton.bind("<1>",lambda event:changeFrame(event,"Input",sideNumber))
         
     #Destroys the frame
     def destroy(self,sideNumber):
