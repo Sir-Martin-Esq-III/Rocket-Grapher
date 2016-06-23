@@ -37,7 +37,7 @@ class stageFrame:
         angle=None
         thrust=None
         amountOfFuel=None
-        burnTime=None
+        stageTime=None
         stageColor=None
 
     def __init__(self,sideNumber):
@@ -67,7 +67,7 @@ class stageFrame:
                     r0StagesList[self.r0currentStageNumber].angle=float(Entry_Angle.get())
                     r0StagesList[self.r0currentStageNumber].amountOfFuel=float(Entry_Fuel.get())
                     r0StagesList[self.r0currentStageNumber].thrust=float(Entry_Thrust.get())
-                    r0StagesList[self.r0currentStageNumber].burnTime=float(Entry_burnTime.get())
+                    r0StagesList[self.r0currentStageNumber].stageTime=float(Entry_stageTime.get())
                     r0StagesList[self.r0currentStageNumber].stageColor=str(Entry_stageColor.get())
                 else:
                     print("Saving stage%i from input field %i"%(self.r1currentStageNumber,sideNumber))
@@ -75,7 +75,7 @@ class stageFrame:
                     r1StagesList[self.r1currentStageNumber].angle=float(Entry_Angle.get())
                     r1StagesList[self.r1currentStageNumber].amountOfFuel=float(Entry_Fuel.get())
                     r1StagesList[self.r1currentStageNumber].thrust=float(Entry_Thrust.get())
-                    r1StagesList[self.r1currentStageNumber].burnTime=float(Entry_burnTime.get())
+                    r1StagesList[self.r1currentStageNumber].stageTime=float(Entry_stageTime.get())
                     r1StagesList[self.r1currentStageNumber].stageColor=str(Entry_stageColor.get())
             except ValueError:
                 print("An error occoured causing the stage not to save")
@@ -122,7 +122,7 @@ class stageFrame:
             angle.set(str(currentStage.angle))
             fuel.set(str(currentStage.amountOfFuel))
             thrust.set(str(currentStage.thrust))
-            burnTime.set(str(currentStage.burnTime))
+            stageTime.set(str(currentStage.stageTime))
             colorBox.config(bg=currentStage.stageColor)
             stageColor.set(str(currentStage.stageColor))
             
@@ -176,11 +176,11 @@ class stageFrame:
         Entry_Thrust.place(x=0,y=180)
 
         #Burn time widgets(Lable&Entry)
-        burnTime=DoubleVar()
-        lable_burnTime=Label(self.newframe, text="Time until next stage(S)",fg ="#8c8c8c",bg ="White",font=self.mainFont)     
-        lable_burnTime.place(x=0,y=200)
-        Entry_burnTime=Entry(self.newframe, textvariable=burnTime,fg ="#E24A33 ",bg ="#E5E5E5",relief=FLAT)
-        Entry_burnTime.place(x=0,y=220)    
+        stageTime=DoubleVar()
+        lable_stageTime=Label(self.newframe, text="Time until next stage(S)",fg ="#8c8c8c",bg ="White",font=self.mainFont)     
+        lable_stageTime.place(x=0,y=200)
+        Entry_stageTime=Entry(self.newframe, textvariable=stageTime,fg ="#E24A33 ",bg ="#E5E5E5",relief=FLAT)
+        Entry_stageTime.place(x=0,y=220)    
 
         #Color widgets(canvas,Lable&Entry)
         stageColor=StringVar()
@@ -239,7 +239,6 @@ class stageFrame:
         #This is so when we graph->input it loads current stage
         changeStageState(None,"None")
  
-
     #Destroys the frame
     def destroy(self,sideNumber):
         sideFrames[sideNumber].newframe.destroy()
@@ -251,70 +250,85 @@ class graphFrame:
     canvas=None
     figure=None
     x=None
-    vel=10 #temp
     xplot=0
     yplot=0
     stagesListUsed=None
-    lastX=0
-    lastY=0
+    lastXVelocity=0
+    lastYVelocity=0
+    lastXDisplacement=0
+    lastYDisplacement=0
+    lastXAcc=0
+    lastYAcc=0
+    totalTime=0
+    
 
-    def getPlots(self,totalMass,angle,engineThrust,amountOfFuel,burnTime,graphType):
+    def getPlots(self,totalMass,angle,engineThrust,amountOfFuel,stageTime,graphType):
+        """while """
         xValues=list()
         yValues=list()
         xAxis=""
         yAxis=""
         g=9.81
 
-        #Resolving the vector into v/h components 
-        verticalForce=engineThrust*(sin(radians(angle)))
-        horizontalForce=engineThrust*(cos(radians(angle)))
-        #Net Forces
-        netVForce=verticalForce-(totalMass*g)#Upthrust-weight
-        #Acceleration
-        verticalAcc=(netVForce/totalMass)#A=F/M
-        horizontalAcc=(horizontalForce/totalMass)
+        #Resolving the engine thrust vector into its v/h components 
+        verticalThrust=engineThrust*(sin(radians(angle)))
+        horizontalThrust=engineThrust*(cos(radians(angle)))
+
         for i in range(0,36):
-            updateTime=(burnTime*(i/35))
+            updateTime=(stageTime*(i/35))
             amountOfFuel-=10
             if (amountOfFuel<0):
-                #Burn stops              
-                print("verticalVel<0 or (amountOfFuel<0)")
-                #verticalVel+= g*(updateTime-burnTime*(i-1/35))/self.lastY V=(g*t)/u
-                #VForce decreases
+                verticalThrust=0   
+                horizontalThrust=0           
+                print( "amountOfFuel<0")          
+
+            #Net Force
+            netVForce=verticalThrust-(totalMass*g)#Upthrust-weight
+
+            #Acceleration
+            verticalAcc=(netVForce/totalMass)#A=F/M
+            horizontalAcc=(horizontalThrust/totalMass)
                 
             #Velocity
-            verticalVel=(verticalAcc*updateTime)# V=AT+u
-            horizontalVel=(horizontalAcc*updateTime)
-            #print("Vv ",verticalVel,"Vh ",horizontalVel)
-            #print("Last y",self.lastY,"Last x",self.lastX)
+            verticalVel=(verticalAcc*updateTime)+self.lastYVelocity# V=AT+u
+            horizontalVel=(horizontalAcc*updateTime)+self.lastXVelocity
+           
+            #Displacement
+            verticalDisplacement=(0.5*(self.lastYVelocity+verticalVel)*updateTime)+self.lastYDisplacement
+            horizDisplacement=(horizontalVel*updateTime)+self.lastXDisplacement
+            if verticalDisplacement <0:
+                verticalDisplacement=0
             
             if graphType=="('Displacement-Time',)":
-                yValues.append(0.5*(self.lastY+verticalVel)*updateTime)#s=1/2(u+v)t
-                xValues.append(updateTime)#t
+                xValues.append(updateTime+self.totalTime)               
+                yValues.append(verticalDisplacement)
                 xAxis="Time (s)"
                 yAxis="Vertical displacement (m)"
+
                 
             elif graphType=="('Velocity-Time',)":
-                yValues.append(verticalVel+self.lastY)
-                xValues.append(updateTime)
-                xAxis="Time"
-                yAxis="Vertical velocity"
+                yValues.append(verticalVel)
+                xValues.append(updateTime+self.totalTime)
+                xAxis="Time (s)"
+                yAxis="Vertical velocity (m/s^-1)"
                 
             elif graphType=="('XDisplacement-YDisplacement',)":
-                yValues.append(0.5*(self.lastY+verticalVel)*updateTime)#s=1/2(u+v)t
-                xValues.append(horizontalVel*updateTime)
-                xAxis="Horizontal displacement"
-                yAxis="Vertical displacement"
+                yValues.append(verticalDisplacement)
+                xValues.append(horizDisplacement)
+                xAxis="Horizontal displacement (m)"
+                yAxis="Vertical displacement (m)"
                 
             elif graphType=="('XVelocity-YVelocity',)":
-                yValues.append(verticalVel+self.lastY)
-                xValues.append(horizontalVel+self.lastX)
-                xAxis="Horizontal velocity"
-                yAxis="Vertical velocity"
-        self.lastY=verticalVel
-        self.lastX=horizontalVel
-        self.totalTime=updateTime
-        print("LAST Y",self.lastY,"LAST X",self.lastX)
+                yValues.append(verticalVel)
+                xValues.append(horizontalVel)
+                xAxis="Horizontal velocity (m/s^-1)"
+                yAxis="Vertical velocity (m/s^-1)"
+
+        self.totalTime+=stageTime
+        self.lastYDisplacement=verticalDisplacement
+        self.lastXDisplacement=horizDisplacement      
+        self.lastYVelocity=verticalVel
+        self.lastXVelocity=horizontalVel
         return(xValues,yValues,xAxis,yAxis)
         
     def __init__(self,sideNumber,graphType):
@@ -337,18 +351,16 @@ class graphFrame:
         else:
             stagesListUsed=r1StagesList
         for i in range(len(stagesListUsed)):
-# should I move this get plots()?
             totalMass=0
             #Find the total mass of the rocket
             for Mass in range(i,len(stagesListUsed)):
                 totalMass+=stagesListUsed[Mass].mass
-            #Get all of the values for all of the inputs    
+            #Get all of the values from all of the inputs    
             angle=stagesListUsed[i].angle
             engineThrust=stagesListUsed[i].thrust
             amountOfFuel=stagesListUsed[i].amountOfFuel
-            burnTime=stagesListUsed[i].burnTime
-            #print("Mass",totalMass,"\n""angle",angle,"\n","EngineThrust",engineThrust,"\n","#Fuel",amountOfFuel,"\n","burnTime",burnTime,"\n")
-            self.xplot,self.yplot,xAxisText,yAxisText= self.getPlots(totalMass,angle,engineThrust,amountOfFuel,burnTime,str(graphType))
+            stageTime=stagesListUsed[i].stageTime
+            self.xplot,self.yplot,xAxisText,yAxisText= self.getPlots(totalMass,angle,engineThrust,amountOfFuel,stageTime,str(graphType))
             color=stagesListUsed[i].stageColor
             a0=plt.plot(self.xplot,self.yplot)
             plt.setp(a0, color=color, linewidth=3.0)
@@ -359,19 +371,16 @@ class graphFrame:
         canvas._tkcanvas.config(highlightthickness=0,background="white")
         canvas.show()
         canvas.get_tk_widget().place(x=0,y=0)
-        
-
+ 
         returnButton=Button(self.newFrame,text="Return to input",fg ="#E24A33 ",relief=FLAT,bg="#E5E5E5")
         returnButton.place(x=(width/2)-125,y=0)
         returnButton.bind("<1>",lambda event:changeFrame(event,"Input",sideNumber))
         
     #Destroys the frame
     def destroy(self,sideNumber):
-        print(sideNumber)
         sideFrames[sideNumber].newFrame.destroy()
         sideFrames[sideNumber].newFrame.destroy()
        
-
 """ChangeFrame(Event: tkEvent-- Has to be passed when the user inputs something from a .bind function
                FrameType: String--"Input"= use instantiate inputStage,"Graph"= use instantiate graphStage,
                SideNumber: Integer--0=left, 1=right)  
@@ -398,8 +407,6 @@ def Destroyer(event,sideNumber):
         print("Frame destroyed: %s on side %i"%(str(sideFrames[sideNumber]),sideNumber))
         sideFrames[sideNumber]=None
         
-
-
 """
 This is called to show input fields when the program runs.
 """
