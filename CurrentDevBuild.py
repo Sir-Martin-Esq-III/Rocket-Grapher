@@ -30,6 +30,8 @@ class stageFrame:
     newFrame=None
     #X/Y pos for frame
     x=None
+    #I am so sorry for doing this
+    
 
     #Class which has all of the variables for each stage
     class Stages:
@@ -39,8 +41,16 @@ class stageFrame:
         amountOfFuel=None
         stageTime=None
         stageColor=None
-
+        def __init__(self):
+            self.mass=0
+            self.angle=0
+            self.thrust=0
+            self.amountOfFuel=0
+            self.stageTime=0
+            self.stageColor="#FFFFFF"
     def __init__(self,sideNumber):
+        errors=[0,0]
+        
         #This makes sure that there is a stage on INIT 
         if sideNumber==0:
             if len(r0StagesList)==0:
@@ -51,12 +61,32 @@ class stageFrame:
             startStage=self.Stages()
             r1StagesList.append(startStage)
 
+
+        def checkErrors():
+            print(errors[0],errors[1])
+            if errors[0]==1 or errors[1]==1:
+                launchButton.config(fg="#747e8b")
+                print("Errors")
+                return True
+            else:
+                launchButton.config(fg="#E24A33")
+                print(" No Errors")
+                return False
+
         #Updates the widget which show the stage color 
         def updateColorBox(event):
             try:
                 colorBox.config(bg=Entry_stageColor.get())
             except TclError:
-                print("Error: %s is not a color. Please use the correct formatting: #000000"%(Entry_stageColor.get()))
+                errors[1]=1
+                checkErrors()
+                errorText.set("Error: %s is not a color."%(Entry_stageColor.get()))
+            else:
+                errors[1]=0
+                checkErrors()
+                errorText.set("")
+
+                
 
         #Saves the current stage
         def saveStage(event):
@@ -78,7 +108,13 @@ class stageFrame:
                     r1StagesList[self.r1currentStageNumber].stageTime=float(Entry_stageTime.get())
                     r1StagesList[self.r1currentStageNumber].stageColor=str(Entry_stageColor.get())
             except ValueError:
-                print("An error occoured causing the stage not to save")
+                errors[0]=1
+                checkErrors()
+                errorText.set("An error occoured causing the stage not to save")
+            else:
+                errors[0]=0
+                checkErrors()
+                errorText.set("")
         #Changes the current stage state
         def changeStageState(event,option):
             #Add a stage
@@ -140,6 +176,12 @@ class stageFrame:
         """---BEGIN UI PLACEMENT---"""
         lable_rocketValue=Label(self.newframe,text="Rocket "+str(sideNumber),fg ="#8c8c8c",bg ="White",font=self.titleFont)
         lable_rocketValue.place(x=width/4,y=0)
+
+        #Error text
+        errorText=StringVar()
+        errorText.set("")    
+        lable_errorText=Label(self.newframe, textvariable=errorText,fg ="red",bg ="White",font=self.mainFont)
+        lable_errorText.place(x=width/8,y=height-50)
 
         #Stage number
         stageValue=StringVar()
@@ -233,8 +275,9 @@ class stageFrame:
         launchButton.bind("<Button-1>",lambda event:launch(event))#Bind to the function "launch"
 
         def launch(event):
-            graphType=str(currentGraphType.get())
-            changeFrame(event,"Graph",sideNumber,graphType)
+            if checkErrors()==False:
+                graphType=str(currentGraphType.get())
+                changeFrame(event,"Graph",sideNumber,graphType)
             
         #This is so when we graph->input it loads current stage
         changeStageState(None,"None")
@@ -286,9 +329,12 @@ class graphFrame:
             netVForce=verticalThrust-(totalMass*g)#Upthrust-weight
 
             #Acceleration
-            verticalAcc=(netVForce/totalMass)#A=F/M
-            horizontalAcc=(horizontalThrust/totalMass)
-                
+            try:
+                verticalAcc=(netVForce/totalMass)#A=F/M
+                horizontalAcc=(horizontalThrust/totalMass)
+            except ZeroDivisionError:
+                return(0,0,"","")
+              
             #Velocity
             verticalVel=(verticalAcc*updateTime)+self.lastYVelocity# V=AT+u
             horizontalVel=(horizontalAcc*updateTime)+self.lastXVelocity
