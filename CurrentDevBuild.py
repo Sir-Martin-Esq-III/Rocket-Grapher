@@ -66,11 +66,9 @@ class stageFrame:
             print(errors[0],errors[1])
             if errors[0]==1 or errors[1]==1:
                 launchButton.config(fg="#747e8b")
-                print("Errors")
                 return True
             else:
                 launchButton.config(fg="#E24A33")
-                print(" No Errors")
                 return False
 
         #Updates the widget which show the stage color 
