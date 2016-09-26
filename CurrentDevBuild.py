@@ -4,12 +4,12 @@ import matplotlib
 matplotlib.use('TkAgg')
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.pyplot as plt
-from matplotlib import style
 
 
 sideFrames=[None,None]
 r0StagesList=list()#List of the stages for Rocket0
 r1StagesList=list() #List of the stages for Rocket1
+
 
 root = Tk()
 #Gets the height and width of the monitor
@@ -29,9 +29,7 @@ class stageFrame:
     #Frame
     newFrame=None
     #X/Y pos for frame
-    x=None
-    #I am so sorry for doing this
-    
+    x=None  
 
     #Class which has all of the variables for each stage
     class Stages:
@@ -197,16 +195,9 @@ class stageFrame:
         Entry_Angle=Entry(self.newframe, textvariable=angle,fg ="#E24A33 ",bg ="#E5E5E5",relief=FLAT)
         Entry_Angle.place(x=0,y=100)
         
-        ##Fuel widgets(Lable&Entry)
-        #fuel=DoubleVar()
-        #lable_Fuel=Label(self.newframe, text="Fuel(L)",fg ="#8c8c8c",bg ="White",font=self.mainFont)     
-        #lable_Fuel.place(x=0,y=120)
-        #Entry_Fuel=Entry(self.newframe, textvariable=fuel,fg ="#E24A33 ",bg ="#E5E5E5",relief=FLAT)
-        #Entry_Fuel.place(x=0,y=140)
-        
         #Thrust widgets(Lable&Entry)
         thrust=DoubleVar()
-        lable_Thrust=Label(self.newframe, text="Engine thrust(KN)",fg ="#8c8c8c",bg ="White",font=self.mainFont)     
+        lable_Thrust=Label(self.newframe, text="Engine thrust(N)",fg ="#8c8c8c",bg ="White",font=self.mainFont)     
         lable_Thrust.place(x=0,y=120)
         Entry_Thrust=Entry(self.newframe, textvariable=thrust,fg ="#E24A33 ",bg ="#E5E5E5",relief=FLAT)
         Entry_Thrust.place(x=0,y=140)
@@ -295,10 +286,8 @@ class graphFrame:
     lastXAcc=0
     lastYAcc=0
     totalTime=0
-    
 
     def getPlots(self,totalMass,angle,engineThrust,stageTime,graphType):
-        """while """
         xValues=list()
         yValues=list()
         xAxis=""
@@ -310,11 +299,10 @@ class graphFrame:
         horizontalThrust=engineThrust*(cos(radians(angle)))
 
         for i in range(0,36):
-            updateTime=(stageTime*(i/35))
-         
-
+            dv=(stageTime*(i/35))
+     
             #Net Force
-            netVForce=verticalThrust-(totalMass*g)#Upthrust-weight
+            netVForce=verticalThrust-(totalMass*-g)#Upthrust-weight
 
             #Acceleration
             try:
@@ -324,25 +312,24 @@ class graphFrame:
                 return(0,0,"","")
               
             #Velocity
-            verticalVel=(verticalAcc*updateTime)+self.lastYVelocity# V=AT+u
-            horizontalVel=(horizontalAcc*updateTime)+self.lastXVelocity
+            verticalVel=(verticalAcc*dv)+self.lastYVelocity# V=AT+u
+            horizontalVel=(horizontalAcc*dv)+self.lastXVelocity
            
             #Displacement
-            verticalDisplacement=(0.5*(self.lastYVelocity+verticalVel)*updateTime)+self.lastYDisplacement
-            horizDisplacement=(horizontalVel*updateTime)+self.lastXDisplacement
+            verticalDisplacement=(0.5*(self.lastYVelocity+verticalVel)*dv)+self.lastYDisplacement
+            horizDisplacement=(horizontalVel*dv)+self.lastXDisplacement
             if verticalDisplacement <0:
                 verticalDisplacement=0
             
             if graphType=="('Displacement-Time',)":
-                xValues.append(updateTime+self.totalTime)               
+                xValues.append(dv+self.totalTime)               
                 yValues.append(verticalDisplacement)
                 xAxis="Time (s)"
                 yAxis="Vertical displacement (m)"
 
-                
             elif graphType=="('Velocity-Time',)":
                 yValues.append(verticalVel)
-                xValues.append(updateTime+self.totalTime)
+                xValues.append(dv+self.totalTime)
                 xAxis="Time (s)"
                 yAxis="Vertical velocity (m/s^-1)"
                 
@@ -357,12 +344,14 @@ class graphFrame:
                 xValues.append(horizontalVel)
                 xAxis="Horizontal velocity (m/s^-1)"
                 yAxis="Vertical velocity (m/s^-1)"
+            
 
         self.totalTime+=stageTime
         self.lastYDisplacement=verticalDisplacement
         self.lastXDisplacement=horizDisplacement      
         self.lastYVelocity=verticalVel
         self.lastXVelocity=horizontalVel
+        
         return(xValues,yValues,xAxis,yAxis)
         
     def __init__(self,sideNumber,graphType):
@@ -404,10 +393,15 @@ class graphFrame:
         canvas._tkcanvas.config(highlightthickness=0,background="white")
         canvas.show()
         canvas.get_tk_widget().place(x=0,y=0)
- 
+        
         returnButton=Button(self.newFrame,text="Return to input",fg ="#E24A33 ",relief=FLAT,bg="#E5E5E5")
         returnButton.place(x=(width/2)-125,y=0)
         returnButton.bind("<1>",lambda event:changeFrame(event,"Input",sideNumber))
+
+        saveButton=Button(self.newFrame,text="Save",fg ="#E24A33 ",relief=FLAT,bg="#E5E5E5")
+        saveButton.place(x=(width/2)-400,y=0)
+        #Will need to choose a more suitable DIR for the picture
+        saveButton.bind("<1>",plt.savefig(r"C:\Users\Thoma\Pictures\Test images\Image.png"))
         
     #Destroys the frame
     def destroy(self,sideNumber):
