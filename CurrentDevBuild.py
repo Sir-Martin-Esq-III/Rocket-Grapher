@@ -16,6 +16,7 @@ root = Tk()
 #Gets the height and width of the monitor
 width=root.winfo_screenwidth()/2
 height=root.winfo_screenheight()/2
+
 root.title("Rocket Science 9000")
 root.geometry("%dx%d+%d+%d" %(width,height,width/2,height/2))
 root.resizable(False,False)
@@ -30,43 +31,43 @@ class stageFrame:
     #Frame
     newFrame=None
     #X/Y pos for frame
-    x=None  
-
+    x=None   
+    tempStageArray=list()
+    tempStageNumber=None
     #Class which has all of the variables for each stage
     class Stages:
-        mass=None
-        angle=None
-        thrust=None
-        amountOfFuel=None
-        stageTime=None
-        stageColor=None
-        def __init__(self):
-            self.mass=0
-            self.angle=0
-            self.thrust=0
-            self.stageTime=0
-            self.stageColor="#FFFFFF"
+        mass=0
+        angle=0
+        thrust=0
+        stageTime=0
+        stageColor="#FFFFFF"
+        
+            
     def __init__(self,sideNumber):
         errors=[0,0]
         
-        #This makes sure that there is a stage on INIT 
+        #Checks what rocket this frame is for and does the appropriate variable assignments
         if sideNumber==0:
-            if len(r0StagesList)==0:
-                startStage=self.Stages()
-                r0StagesList.append(startStage)
+            self.x=0
+            self.tempStageArray=r0StagesList
+            self.tempStageNumber=self.r0currentStageNumber
+
         else:
-           if len(r1StagesList)==0:
+           self.x=width/2
+           self.tempStageArray=r1StagesList
+           self.tempStageNumber=self.r1currentStageNumber
+
+        if len(self.tempStageArray)==0:
             startStage=self.Stages()
-            r1StagesList.append(startStage)
-
-
+            self.tempStageArray.append(startStage)
+    
         def checkErrors():
-            print(errors[0],errors[1])
             if errors[0]==1 or errors[1]==1:
                 launchButton.config(fg="#747e8b")
                 return True
             else:
                 launchButton.config(fg="#E24A33")
+                errorText.set("")
                 return False
 
         #Updates the widget which show the stage color 
@@ -79,28 +80,16 @@ class stageFrame:
                 errorText.set("Error: %s is not a color."%(Entry_stageColor.get()))
             else:
                 errors[1]=0
-                checkErrors()
-                errorText.set("")
-
-                
+                checkErrors()               
 
         #Saves the current stage
         def saveStage(event):
             try:
-                if sideNumber==0:
-                    print("Saving stage%i from input field %i"%(self.r0currentStageNumber,sideNumber))
-                    r0StagesList[self.r0currentStageNumber].mass=float(Entry_Mass.get())
-                    r0StagesList[self.r0currentStageNumber].angle=float(Entry_Angle.get())
-                    r0StagesList[self.r0currentStageNumber].thrust=float(Entry_Thrust.get())
-                    r0StagesList[self.r0currentStageNumber].stageTime=float(Entry_stageTime.get())
-                    r0StagesList[self.r0currentStageNumber].stageColor=str(Entry_stageColor.get())
-                else:
-                    print("Saving stage%i from input field %i"%(self.r1currentStageNumber,sideNumber))
-                    r1StagesList[self.r1currentStageNumber].mass=float(Entry_Mass.get())
-                    r1StagesList[self.r1currentStageNumber].angle=float(Entry_Angle.get())
-                    r1StagesList[self.r1currentStageNumber].thrust=float(Entry_Thrust.get())
-                    r1StagesList[self.r1currentStageNumber].stageTime=float(Entry_stageTime.get())
-                    r1StagesList[self.r1currentStageNumber].stageColor=str(Entry_stageColor.get())
+                    self.tempStageArray[self.tempStageNumber].mass=float(Entry_Mass.get())
+                    self.tempStageArray[self.tempStageNumber].angle=float(Entry_Angle.get())
+                    self.tempStageArray[self.tempStageNumber].thrust=float(Entry_Thrust.get())
+                    self.tempStageArray[self.tempStageNumber].stageTime=float(Entry_stageTime.get())
+                    self.tempStageArray[self.tempStageNumber].stageColor=str(Entry_stageColor.get())
             except ValueError:
                 errors[0]=1
                 checkErrors()
@@ -108,46 +97,26 @@ class stageFrame:
             else:
                 errors[0]=0
                 checkErrors()
-                errorText.set("")
+
         #Changes the current stage state
         def changeStageState(event,option):
             #Add a stage
             if option=="Add":
-                if sideNumber==0:
-                    self.r0currentStageNumber =len(r0StagesList)
-                    currentStage=self.Stages()
-                    r0StagesList.append(currentStage)
-                    print("Last stage added %i to rocket%i" %(self.r0currentStageNumber,sideNumber))
-                else:
-                    self.r1currentStageNumber =len(r1StagesList)
-                    currentStage=self.Stages()
-                    r1StagesList.append(currentStage)
-                    print("Last stage added %i to rocket%i" %(self.r1currentStageNumber,sideNumber))
-                
+                self.tempStageNumber =len(self.tempStageArray)
+                newStage=self.Stages()
+                self.tempStageArray.append(newStage)
             #Cycle left
             elif option=="Left":
-                if sideNumber==0:
-                    if self.r0currentStageNumber!=0:
-                        self.r0currentStageNumber-=1
-                else:
-                    if self.r1currentStageNumber!=0:
-                        self.r1currentStageNumber-=1
+                if self.tempStageNumber!=0:
+                    self.tempStageNumber-=1
             #Cycle right
             elif option=="Right":
-                if sideNumber==0:
-                    if self.r0currentStageNumber<len(r0StagesList)-1:
-                        self.r0currentStageNumber+=1
-                else:
-                    if self.r1currentStageNumber<len(r1StagesList)-1:
-                        self.r1currentStageNumber+=1
+                if self.tempStageNumber<len(self.tempStageArray)-1:
+                    self.tempStageNumber+=1
 
             #Sets all of the entry widgets to the value of the currentStages class instance 
-            if sideNumber==0:
-                stageValue.set("Stage %i"%(self.r0currentStageNumber))
-                currentStage=r0StagesList[self.r0currentStageNumber]
-            else:
-                stageValue.set("Stage %i"%(self.r1currentStageNumber))
-                currentStage=r1StagesList[self.r1currentStageNumber]
+            stageValue.set("Stage %i"%(self.tempStageNumber))
+            currentStage=self.tempStageArray[self.tempStageNumber]
             mass.set(str(currentStage.mass))
             angle.set(str(currentStage.angle))
             thrust.set(str(currentStage.thrust))
@@ -158,13 +127,9 @@ class stageFrame:
         #Create a new frame
         self.newframe=Frame(height=height,width=width/2)
         self.newframe.config(bg ="white")
-        #Get X coord
-        if sideNumber==0:
-            x=0
-        else:
-            x=width/2
+     
         #Place the new frame at (x,0)
-        self.newframe.place(x=x,y=0)
+        self.newframe.place(x=self.x,y=0)
         
         """---BEGIN UI PLACEMENT---"""
         lable_rocketValue=Label(self.newframe,text="Rocket "+str(sideNumber),fg ="#8c8c8c",bg ="White",font=self.titleFont)
@@ -279,13 +244,11 @@ class graphFrame:
     x=None
     xplot=0
     yplot=0
-    stagesListUsed=None
+    currentRocketStages=None
     lastXVelocity=0
     lastYVelocity=0
     lastXDisplacement=0
     lastYDisplacement=0
-    lastXAcc=0
-    lastYAcc=0
     totalTime=0
 
     def getPlots(self,totalMass,angle,engineThrust,stageTime,graphType):
@@ -299,38 +262,38 @@ class graphFrame:
         verticalThrust=engineThrust*(sin(radians(angle)))
         horizontalThrust=engineThrust*(cos(radians(angle)))
 
-        for i in range(0,36):
-            dv=(stageTime*(i/35))
-     
-            #Net Force
-            netVForce=verticalThrust-(totalMass*-g)#Upthrust-weight
+        #Net Force
+        netVForce=verticalThrust-(totalMass*g)#Upthrust-weight
 
-            #Acceleration
-            try:
-                verticalAcc=(netVForce/totalMass)#A=F/M
-                horizontalAcc=(horizontalThrust/totalMass)
-            except ZeroDivisionError:
-                return(0,0,"","")
-              
+        #Acceleration
+        try:
+            verticalAcc=(netVForce/totalMass)#A=F/M
+            horizontalAcc=(horizontalThrust/totalMass)
+        except ZeroDivisionError:
+            return(0,0,"","")
+
+        for i in range(0,36):
+            dt=(stageTime*(i/35))
+                   
             #Velocity
-            verticalVel=(verticalAcc*dv)+self.lastYVelocity# V=AT+u
-            horizontalVel=(horizontalAcc*dv)+self.lastXVelocity
+            verticalVel=(verticalAcc*dt)+self.lastYVelocity# V=AT+u
+            horizontalVel=(horizontalAcc*dt)+self.lastXVelocity
            
             #Displacement
-            verticalDisplacement=(0.5*(self.lastYVelocity+verticalVel)*dv)+self.lastYDisplacement
-            horizDisplacement=(horizontalVel*dv)+self.lastXDisplacement
+            verticalDisplacement=(0.5*(self.lastYVelocity+verticalVel)*dt)+self.lastYDisplacement
+            horizDisplacement=(horizontalVel*dt)+self.lastXDisplacement
             if verticalDisplacement <0:
                 verticalDisplacement=0
             
             if graphType=="('Displacement-Time',)":
-                xValues.append(dv+self.totalTime)               
+                xValues.append(dt+self.totalTime)               
                 yValues.append(verticalDisplacement)
                 xAxis="Time (s)"
                 yAxis="Vertical displacement (m)"
 
             elif graphType=="('Velocity-Time',)":
                 yValues.append(verticalVel)
-                xValues.append(dv+self.totalTime)
+                xValues.append(dt+self.totalTime)
                 xAxis="Time (s)"
                 yAxis="Vertical velocity (m/s^-1)"
                 
@@ -361,40 +324,40 @@ class graphFrame:
         self.newFrame=Frame(height=height,width=width/2)
         self.newFrame.config(bg ="white")
         if sideNumber==0:
-            x=0
+            self.x=0
+            self.currentRocketStages=r0StagesList
         else:
-            x=width/2
+            self.currentRocketStages=r1StagesList
+            self.x=width/2
         #Create the frame
-        self.newFrame.place(x=x,y=0)
+        self.newFrame.place(x=self.x,y=0)
         widthInches= root.winfo_screenwidth() / root.winfo_fpixels('1i')
         heightInches= root.winfo_screenheight() / root.winfo_fpixels('1i')
         #Begin graph creation
-        figure = plt.figure(figsize=(((widthInches/4)-.2),(heightInches/2)-.2), dpi=100,frameon=False,tight_layout=True)        
-        if sideNumber==0:
-            stagesListUsed=r0StagesList
-        else:
-            stagesListUsed=r1StagesList
-        for i in range(len(stagesListUsed)):
+        self.figure = plt.figure(figsize=(((widthInches/4)-.2),(heightInches/2)-.2), dpi=100,frameon=False,tight_layout=True)        
+
+        for i in range(len(self.currentRocketStages)):
             totalMass=0
             #Find the total mass of the rocket
-            for Mass in range(i,len(stagesListUsed)):
-                totalMass+=stagesListUsed[Mass].mass
+            for Mass in range(i,len(self.currentRocketStages)):
+                totalMass+=self.currentRocketStages[Mass].mass
             #Get all of the values from all of the inputs    
-            angle=stagesListUsed[i].angle
-            engineThrust=stagesListUsed[i].thrust
-            stageTime=stagesListUsed[i].stageTime
+            angle=self.currentRocketStages[i].angle
+            engineThrust=self.currentRocketStages[i].thrust
+            stageTime=self.currentRocketStages[i].stageTime
             self.xplot,self.yplot,xAxisText,yAxisText= self.getPlots(totalMass,angle,engineThrust,stageTime,str(graphType))
-            color=stagesListUsed[i].stageColor
+            color=self.currentRocketStages[i].stageColor
             a0=plt.plot(self.xplot,self.yplot)
             plt.setp(a0, color=color, linewidth=3.0)
 
         plt.ylabel(yAxisText)
         plt.xlabel(xAxisText)
-        canvas = FigureCanvasTkAgg(figure, self.newFrame)
+        canvas = FigureCanvasTkAgg(self.figure, self.newFrame)
         canvas._tkcanvas.config(highlightthickness=0,background="white")
         canvas.show()
         canvas.get_tk_widget().place(x=0,y=0)
         
+ 
         returnButton=Button(self.newFrame,text="Return to input",fg ="#E24A33 ",relief=FLAT,bg="#E5E5E5")
         returnButton.place(x=(width/2)-125,y=0)
         returnButton.bind("<1>",lambda event:changeFrame(event,"Input",sideNumber))
@@ -420,7 +383,6 @@ def changeFrame(event,Type,sideNumber,*args):
         sideFrames[sideNumber]=stageFrame(sideNumber)
     else:
         sideFrames[sideNumber]=graphFrame(sideNumber,args)
-    print("Frame added: %s on side %i"%(str(sideFrames[sideNumber]),sideNumber))
 
 """Destroyer(Event: tkEvent-- Has to be passed when the user inputs something from a .bind function
             SideNumber: Integer--0=left, 1=right)  
@@ -430,9 +392,8 @@ def Destroyer(event,sideNumber):
     try:
         sideFrames[sideNumber].destroy(sideNumber)
     except AttributeError:
-        print("Tried to destroy a frame that is not there")
+        pass
     else:
-        print("Frame destroyed: %s on side %i"%(str(sideFrames[sideNumber]),sideNumber))
         sideFrames[sideNumber]=None
         
 """
