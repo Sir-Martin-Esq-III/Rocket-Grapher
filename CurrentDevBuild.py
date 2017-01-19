@@ -26,14 +26,10 @@ class stageFrame:
     mainFont=("TkDefaultFont",10,"bold")
     titleFont=("TkDefaultFont",12,"bold")
     #Current stage numbers for each rocket
-    r0currentStageNumber=0
-    r1currentStageNumber=0
-    #Frame
-    newFrame=None
     #X/Y pos for frame
     x=None   
     tempStageArray=list()
-    tempStageNumber=None
+    tempStageNumber=0
     #Class which has all of the variables for each stage
     class Stages:
         mass=0
@@ -50,12 +46,12 @@ class stageFrame:
         if sideNumber==0:
             self.x=0
             self.tempStageArray=r0StagesList
-            self.tempStageNumber=self.r0currentStageNumber
+            #self.tempStageNumber=self.r0currentStageNumber
 
         else:
            self.x=width/2
            self.tempStageArray=r1StagesList
-           self.tempStageNumber=self.r1currentStageNumber
+           #self.tempStageNumber=self.r1currentStageNumber
 
         if len(self.tempStageArray)==0:
             startStage=self.Stages()
