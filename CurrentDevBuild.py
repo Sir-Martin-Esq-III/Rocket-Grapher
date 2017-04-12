@@ -63,7 +63,7 @@ class stageFrame:
                 launchButton.config(fg="#747e8b")
                 return True
             else:
-                launchButton.config(fg="#E24A33")
+                launchButton.config(fg="#039be5")
                 errorText.set("")
                 return False
 
@@ -123,87 +123,88 @@ class stageFrame:
             
         #Create a new frame
         self.newframe=Frame(height=height,width=width/2)
-        self.newframe.config(bg ="white")
+        self.newframe.config(bg ="#dbdbdb")
      
         #Place the new frame at (x,0)
         self.newframe.place(x=self.x,y=0)
         
         """---BEGIN UI PLACEMENT---"""
-        lable_rocketValue=Label(self.newframe,text="Rocket "+str(sideNumber),fg ="#8c8c8c",bg ="White",font=self.titleFont)
+        lable_rocketValue=Label(self.newframe,text="Rocket "+str(sideNumber),fg ="#039be5",bg ="#dbdbdb",font=self.titleFont)
         lable_rocketValue.place(x=width/4,y=0)
 
         #Error text
         errorText=StringVar()
         errorText.set("")    
-        lable_errorText=Label(self.newframe, textvariable=errorText,fg ="red",bg ="White",font=self.mainFont)
+        lable_errorText=Label(self.newframe, textvariable=errorText,fg ="red",bg ="#dbdbdb",font=self.mainFont)
         lable_errorText.place(x=width/8,y=height-50)
 
         #Stage number
         stageValue=StringVar()
         stageValue.set("Stage 0")    
-        lable_stageValue=Label(self.newframe, textvariable=stageValue,fg ="#8c8c8c",bg ="White",font=self.mainFont)
+        lable_stageValue=Label(self.newframe, textvariable=stageValue,fg ="#29b6f6",bg ="#dbdbdb",font=self.mainFont)
         lable_stageValue.place(x=width/4,y=20)
         
         #Mass widgets(Lable&Entry)
         mass=DoubleVar()
-        lable_Mass=Label(self.newframe, text="Mass(KG)",fg ="#8c8c8c",bg ="White",font=self.mainFont)   
+        lable_Mass=Label(self.newframe, text="Mass(KG)",fg ="#29b6f6",bg ="#dbdbdb",font=self.mainFont)   
         lable_Mass.place(x=0,y=40)  
-        Entry_Mass=Entry(self.newframe,textvariable=mass, fg ="#E24A33 ",bg ="#E5E5E5",relief=FLAT)
+        Entry_Mass=Entry(self.newframe,textvariable=mass, fg ="#039be5 ",bg ="#c9c9c9",relief=FLAT)
         Entry_Mass.place(x=0,y=60)
         
         #Angle widgets(Lable&Entry)
         angle=DoubleVar()
-        lable_Angle=Label(self.newframe, text="Angle(°)",fg ="#8c8c8c",bg ="White",font=self.mainFont)     
+        lable_Angle=Label(self.newframe, text="Angle(°)",fg ="#29b6f6",bg ="#dbdbdb",font=self.mainFont)     
         lable_Angle.place(x=0,y=80)
-        Entry_Angle=Entry(self.newframe, textvariable=angle,fg ="#E24A33 ",bg ="#E5E5E5",relief=FLAT)
+        Entry_Angle=Entry(self.newframe, textvariable=angle,fg ="#039be5 ",bg ="#c9c9c9",relief=FLAT)
         Entry_Angle.place(x=0,y=100)
         
         #Thrust widgets(Lable&Entry)
         thrust=DoubleVar()
-        lable_Thrust=Label(self.newframe, text="Engine thrust(N)",fg ="#8c8c8c",bg ="White",font=self.mainFont)     
+        lable_Thrust=Label(self.newframe, text="Engine thrust(N)",fg ="#29b6f6",bg ="#dbdbdb",font=self.mainFont)     
         lable_Thrust.place(x=0,y=120)
-        Entry_Thrust=Entry(self.newframe, textvariable=thrust,fg ="#E24A33 ",bg ="#E5E5E5",relief=FLAT)
+        Entry_Thrust=Entry(self.newframe, textvariable=thrust,fg ="#039be5 ",bg ="#c9c9c9",relief=FLAT)
         Entry_Thrust.place(x=0,y=140)
 
         #Burn time widgets(Lable&Entry)
         stageTime=DoubleVar()
-        lable_stageTime=Label(self.newframe, text="Time until next stage(S)",fg ="#8c8c8c",bg ="White",font=self.mainFont)     
+        lable_stageTime=Label(self.newframe, text="Time until next stage(S)",fg ="#29b6f6",bg ="#dbdbdb",font=self.mainFont)     
         lable_stageTime.place(x=0,y=160)
-        Entry_stageTime=Entry(self.newframe, textvariable=stageTime,fg ="#E24A33 ",bg ="#E5E5E5",relief=FLAT)
+        Entry_stageTime=Entry(self.newframe, textvariable=stageTime,fg ="#039be5 ",bg ="#c9c9c9",relief=FLAT)
         Entry_stageTime.place(x=0,y=180)    
 
         #Color widgets(canvas,Lable&Entry)
         stageColor=StringVar()
         stageColor.set("#")
-        lable_stageColor=Label(self.newframe, text="Stage color (Hex)",fg ="#8c8c8c",bg ="White",font=self.mainFont)     
+        lable_stageColor=Label(self.newframe, text="Stage color (Hex)",fg ="#29b6f6",bg ="#dbdbdb",font=self.mainFont)     
         lable_stageColor.place(x=0,y=200)
-        Entry_stageColor=Entry(self.newframe, textvariable=stageColor,fg ="#E24A33 ",bg ="#E5E5E5",relief=FLAT)
+        Entry_stageColor=Entry(self.newframe, textvariable=stageColor,fg ="#039be5 ",bg ="#c9c9c9",relief=FLAT)
         Entry_stageColor.place(x=0,y=220)
         Entry_stageColor.bind("<FocusOut>",lambda event:updateColorBox(event))
-        colorBox=Canvas(self.newframe, width=25, height=15)
-        colorBox.place(x=100,y=220)
+        colorBox=Canvas(self.newframe, width=25, height=19,highlightthickness=0, relief='ridge')
+        colorBox.place(x=99,y=220)
+    
 
         #Adds a stage to the rocket
-        addStageButton=Button(self.newframe,text="+ Stage",fg ="#E24A33 ",relief=FLAT,bg="#E5E5E5",font=self.mainFont)
+        addStageButton=Button(self.newframe,text="+ Stage",fg ="#039be5 ",relief=FLAT,bg="#c9c9c9",font=self.mainFont)
         addStageButton.place(x=(width/2)-100,y=20)
         addStageButton.bind("<Button-1>",lambda event:changeStageState(event,"Add"))
         #Save the values for the current stage
-        saveStageButton=Button(self.newframe,text="Save Stage",fg ="#E24A33 ",relief=FLAT,bg="#E5E5E5",font=self.mainFont)
+        saveStageButton=Button(self.newframe,text="Save Stage",fg ="#039be5 ",relief=FLAT,bg="#c9c9c9",font=self.mainFont)
         saveStageButton.place(x=240,y=220)
         saveStageButton.bind("<Button-1>",lambda event:saveStage(event))
         
         #Cycles to the stage before the current one current stage=0 then don't show
-        cycleStageLeft=Button(self.newframe,text="<",fg ="#E24A33 ",relief=FLAT,bg="#E5E5E5",font=self.mainFont)
+        cycleStageLeft=Button(self.newframe,text="<",fg ="#039be5 ",relief=FLAT,bg="#c9c9c9",font=self.mainFont)
         cycleStageLeft.place(x=(width/4)-20,y=20)
         cycleStageLeft.bind("<Button-1>",lambda event:changeStageState(event,"Left"))
 
         #Cycles to the stage after the current one#current stage=max then don't show
-        cycleStageRight=Button(self.newframe,text=">",fg ="#E24A33 ",relief=FLAT,bg="#E5E5E5",font=self.mainFont)
+        cycleStageRight=Button(self.newframe,text=">",fg ="#039be5 ",relief=FLAT,bg="#c9c9c9",font=self.mainFont)
         cycleStageRight.place(x=(width/4)+60,y=20)
         cycleStageRight.bind("<Button-1>",lambda event:changeStageState(event,"Right"))
 
         #Graph widgets
-        lable_graphType=Label(self.newframe, text="Graph type",fg ="#8c8c8c",bg ="White",font=self.mainFont)
+        lable_graphType=Label(self.newframe, text="Graph type",fg ="#29b6f6",bg ="#dbdbdb",font=self.mainFont)
         lable_graphType.place(x=0,y=290)
         #Dropdown box
         currentGraphType=StringVar()
@@ -214,9 +215,10 @@ class stageFrame:
                     "XVelocity-YVelocity"]
         w =  OptionMenu(self.newframe, currentGraphType , *graphTypes)
         w.place(x=0,y=350)
+        w.config(bg="#c9c9c9",relief=FLAT,highlightthickness=0,activebackground="#afafaf")
 
         #Launch button
-        launchButton=Button(self.newframe,text="Launch",fg ="#E24A33 ",relief=FLAT,bg="#E5E5E5",font=self.mainFont)
+        launchButton=Button(self.newframe,text="Launch",fg ="#039be5 ",relief=FLAT,bg="#c9c9c9",font=self.mainFont)
         launchButton.place(x=0,y=height-50)
         launchButton.bind("<Button-1>",lambda event:launch(event))#Bind to the function "launch"
 
@@ -240,7 +242,6 @@ class graphFrame:
     figure=None
     x=None
     currentRocketStages=None
-    totalTime=0
 
     def getPlots(self,graphType,sepTimeQueue,stageList):
         xValues=list()
@@ -248,11 +249,8 @@ class graphFrame:
         xAxis=""
         yAxis=""
 
-        xAxisText=""
-        yAxisText=""
         self.newFrame=Frame(height=height,width=width/2)
-        self.newFrame.config(bg ="white")
-
+        self.newFrame.config(bg ="#dbdbdb")
         self.newFrame.place(x=self.x,y=0)
         widthInches= root.winfo_screenwidth() / root.winfo_fpixels('1i')
         heightInches= root.winfo_screenheight() / root.winfo_fpixels('1i')
@@ -260,8 +258,8 @@ class graphFrame:
         fy=fx=vy=vx=py=px=t=0
         g=-9.81
         dt=0.01
-
         thrust= stageList[0].thrust
+
         while py>=0:
             totalMass=0
             color=stageList[0].stageColor
@@ -271,7 +269,6 @@ class graphFrame:
                 if len(stageList)==1:#Make sure we do not lose the last stage of the rocket.
                     thrust=0
                 else:                
-                    print("STAGE SEP")
                     stageList.pop(0)
                 if len(sepTimeQueue)>1:#If it is not the last stage
                     sepTimeQueue.pop(0)
@@ -288,8 +285,7 @@ class graphFrame:
             vx+=(fx/totalMass)*dt
             py+=vy*dt
             px+=vx*dt   
-
-            print("t: ",t," Vy: ",vy," Py: ",py,)                  
+               
             if graphType=="('Displacement-Time',)":
                 xValues.append(dt+t)              
                 yValues.append(py)
@@ -316,6 +312,8 @@ class graphFrame:
             t+=dt      
         a0= plt.plot(xValues,yValues)
         plt.setp(a0, color=color, linewidth=3.0) 
+        plt.ylabel(yAxis)
+        plt.xlabel(xAxis)
         canvas = FigureCanvasTkAgg(self.figure, self.newFrame)
         canvas._tkcanvas.config(highlightthickness=0,background="white")
         canvas.show()
@@ -348,7 +346,7 @@ class graphFrame:
         for stageitr in range(len(self.currentRocketStages)):
             sepTimeQueue.append(totalStageTime+self.currentRocketStages[stageitr].stageTime)
             totalStageTime+=self.currentRocketStages[stageitr].stageTime
-            print(totalStageTime)
+
        
         stagesListCopy=list(self.currentRocketStages)
         self.getPlots(str(graphType),sepTimeQueue,stagesListCopy)
