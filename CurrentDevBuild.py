@@ -1,5 +1,6 @@
 from tkinter import *
 from math import *
+from tkinter import filedialog   
 import matplotlib
 matplotlib.use('TkAgg')
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
@@ -238,87 +239,97 @@ class graphFrame:
     canvas=None
     figure=None
     x=None
-    xplot=0
-    yplot=0
     currentRocketStages=None
-    lastXVelocity=0
-    lastYVelocity=0
-    lastXDisplacement=0
-    lastYDisplacement=0
     totalTime=0
 
-    def getPlots(self,totalMass,angle,engineThrust,stageTime,graphType):
+    def getPlots(self,graphType,sepTimeQueue,stageList):
         xValues=list()
         yValues=list()
         xAxis=""
         yAxis=""
+
+        xAxisText=""
+        yAxisText=""
+        self.newFrame=Frame(height=height,width=width/2)
+        self.newFrame.config(bg ="white")
+
+        self.newFrame.place(x=self.x,y=0)
+        widthInches= root.winfo_screenwidth() / root.winfo_fpixels('1i')
+        heightInches= root.winfo_screenheight() / root.winfo_fpixels('1i')
+       
+        fy=fx=vy=vx=py=px=t=0
         g=-9.81
+        dt=0.01
 
-        #Resolving the engine thrust vector into its v/h components 
-        verticalThrust=engineThrust*(sin(radians(angle)))
-        horizontalThrust=engineThrust*(cos(radians(angle)))
+        thrust= stageList[0].thrust
+        while py>=0:
+            totalMass=0
+            color=stageList[0].stageColor
+            if t>=sepTimeQueue[0]:#New stage
+                a0= plt.plot(xValues,yValues)
+                plt.setp(a0, color=color, linewidth=3.0)
+                if len(stageList)==1:#Make sure we do not lose the last stage of the rocket.
+                    thrust=0
+                else:                
+                    print("STAGE SEP")
+                    stageList.pop(0)
+                if len(sepTimeQueue)>1:#If it is not the last stage
+                    sepTimeQueue.pop(0)
+                    del xValues[:]
+                    del yValues[:]
+               
+        #get the new totalMass
+            for stageitr in range(len(stageList)):
+                totalMass+=stageList[stageitr].mass
+        #Do calculations 
+            fy=thrust*(sin(radians(stageList[0].angle)))+ (totalMass*g)
+            fx=thrust*(cos(radians(stageList[0].angle)))
+            vy+=(fy/totalMass)*dt
+            vx+=(fx/totalMass)*dt
+            py+=vy*dt
+            px+=vx*dt   
 
-        #Net Force
-        netVForce=verticalThrust-(totalMass*g)#Upthrust-weight
-
-        #Acceleration
-        try:
-            verticalAcc=(netVForce/totalMass)#A=F/M
-            horizontalAcc=(horizontalThrust/totalMass)
-        except ZeroDivisionError:
-            return(0,0,"","")
-
-        for i in range(0,36):
-            dt=(stageTime*(i/35))
-                   
-            #Velocity
-            verticalVel=(verticalAcc*dt)+self.lastYVelocity# V=AT+u
-            horizontalVel=(horizontalAcc*dt)+self.lastXVelocity
-           
-            #Displacement
-            verticalDisplacement=(0.5*(self.lastYVelocity+verticalVel)*dt)+self.lastYDisplacement
-            horizDisplacement=(horizontalVel*dt)+self.lastXDisplacement
-            if verticalDisplacement <0:
-                verticalDisplacement=0
-            
+            print("t: ",t," Vy: ",vy," Py: ",py,)                  
             if graphType=="('Displacement-Time',)":
-                xValues.append(dt+self.totalTime)               
-                yValues.append(verticalDisplacement)
+                xValues.append(dt+t)              
+                yValues.append(py)
                 xAxis="Time (s)"
                 yAxis="Vertical displacement (m)"
 
             elif graphType=="('Velocity-Time',)":
-                yValues.append(verticalVel)
-                xValues.append(dt+self.totalTime)
+                yValues.append(vy)
+                xValues.append(dt+t)
                 xAxis="Time (s)"
                 yAxis="Vertical velocity (m/s^-1)"
                 
             elif graphType=="('XDisplacement-YDisplacement',)":
-                yValues.append(verticalDisplacement)
-                xValues.append(horizDisplacement)
+                yValues.append(py)
+                xValues.append(px)
                 xAxis="Horizontal displacement (m)"
                 yAxis="Vertical displacement (m)"
                 
             elif graphType=="('XVelocity-YVelocity',)":
-                yValues.append(verticalVel)
-                xValues.append(horizontalVel)
+                yValues.append(vy)
+                xValues.append(vx)
                 xAxis="Horizontal velocity (m/s^-1)"
                 yAxis="Vertical velocity (m/s^-1)"
-            
-
-        self.totalTime+=stageTime
-        self.lastYDisplacement=verticalDisplacement
-        self.lastXDisplacement=horizDisplacement      
-        self.lastYVelocity=verticalVel
-        self.lastXVelocity=horizontalVel
-        
-        return(xValues,yValues,xAxis,yAxis)
+            t+=dt      
+        a0= plt.plot(xValues,yValues)
+        plt.setp(a0, color=color, linewidth=3.0) 
+        canvas = FigureCanvasTkAgg(self.figure, self.newFrame)
+        canvas._tkcanvas.config(highlightthickness=0,background="white")
+        canvas.show()
+        canvas.get_tk_widget().place(x=0,y=0)
+         
         
     def __init__(self,sideNumber,graphType):
         xAxisText=""
         yAxisText=""
         self.newFrame=Frame(height=height,width=width/2)
         self.newFrame.config(bg ="white")
+        sepTimeQueue=[]
+        totalStageTime=0
+  
         if sideNumber==0:
             self.x=0
             self.currentRocketStages=r0StagesList
@@ -332,27 +343,15 @@ class graphFrame:
         #Begin graph creation
         self.figure = plt.figure(figsize=(((widthInches/4)-.2),(heightInches/2)-.2), dpi=100,frameon=False,tight_layout=True)        
 
-        for i in range(len(self.currentRocketStages)):
-            totalMass=0
-            #Find the total mass of the rocket
-            for Mass in range(i,len(self.currentRocketStages)):
-                totalMass+=self.currentRocketStages[Mass].mass
-            #Get all of the values from all of the inputs    
-            angle=self.currentRocketStages[i].angle
-            engineThrust=self.currentRocketStages[i].thrust
-            stageTime=self.currentRocketStages[i].stageTime
-            self.xplot,self.yplot,xAxisText,yAxisText= self.getPlots(totalMass,angle,engineThrust,stageTime,str(graphType))
-            color=self.currentRocketStages[i].stageColor
-            a0=plt.plot(self.xplot,self.yplot)
-            plt.setp(a0, color=color, linewidth=3.0)
 
-        plt.ylabel(yAxisText)
-        plt.xlabel(xAxisText)
-        canvas = FigureCanvasTkAgg(self.figure, self.newFrame)
-        canvas._tkcanvas.config(highlightthickness=0,background="white")
-        canvas.show()
-        canvas.get_tk_widget().place(x=0,y=0)
-        
+        #Creates the queue for all of the stage seperations.
+        for stageitr in range(len(self.currentRocketStages)):
+            sepTimeQueue.append(totalStageTime+self.currentRocketStages[stageitr].stageTime)
+            totalStageTime+=self.currentRocketStages[stageitr].stageTime
+            print(totalStageTime)
+       
+        stagesListCopy=list(self.currentRocketStages)
+        self.getPlots(str(graphType),sepTimeQueue,stagesListCopy)
  
         returnButton=Button(self.newFrame,text="Return to input",fg ="#E24A33 ",relief=FLAT,bg="#E5E5E5")
         returnButton.place(x=(width/2)-125,y=0)
