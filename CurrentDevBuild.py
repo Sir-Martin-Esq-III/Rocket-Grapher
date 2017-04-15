@@ -41,14 +41,7 @@ class stageFrame:
     def __init__(self,xPos):
         errors=[0,0]
         self.x=xPos
-        #Checks what rocket this frame is for and does the appropriate variable assignments
-        #if sideNumber==0:
-        #    self.x=0
-        #    self.tempStageArray=r0StagesList
-        #else:
-         #  self.x=width/2
-         #  self.tempStageArray=r1StagesList
-
+        
         if len(self.tempStageArray)==0:
             startStage=self.Stages()
             self.tempStageArray.append(startStage)
