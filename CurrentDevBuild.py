@@ -27,7 +27,7 @@ class stageFrame:
     #Current stage numbers for each rocket
     #X/Y pos for frame
     x=None   
-    tempStageArray=list()
+    tempStageArray=None
     tempStageNumber=0
     #Class which has all of the variables for each stage
     class Stages:
@@ -38,10 +38,18 @@ class stageFrame:
         stageColor="#FFFFFF"
         
             
-    def __init__(self,xPos):
+    def __init__(self,xPos,stagesList):
         errors=[0,0]
         self.x=xPos
-        
+        self.tempStageArray=list()
+        #Checks what rocket this frame is for and does the appropriate variable assignments
+        #if sideNumber==0:
+        #    self.x=0
+        #    self.tempStageArray=r0StagesList
+        #else:
+         #  self.x=width/2
+         #  self.tempStageArray=r1StagesList
+        self.tempStageArray=stagesList
         if len(self.tempStageArray)==0:
             startStage=self.Stages()
             self.tempStageArray.append(startStage)
@@ -121,12 +129,14 @@ class stageFrame:
             #new
             self.tempStageArray.append(self.Stages())
             lineCounter=0
-            amountOfLines=0
-            fileName=input("What is the file name: ")
+            amountOfLines=0     
+            fileName=input("What is the file name: ")+'.csv'
             try:
-                with open(fileName+'.csv') as csvFile:
+                with open(fileName) as csvFile:
                     readCSV = csv.reader(csvFile,delimiter=',')
-                    amountOfLines=len(open("test.csv").readlines())           
+                    amountOfLines=len(open(fileName).readlines()) 
+                    print (amountOfLines)
+                             
                     for row in readCSV:
                         mass.set(str(row[0]))
                         angle.set(str(row[1]))
@@ -134,8 +144,11 @@ class stageFrame:
                         stageTime.set(str(row[3]))
                         stageColor.set(str(row[4]))
                         saveStage(None)
+                        #print(row)
+                       # print(lineCounter," ",amountOfLines-1)
                         if lineCounter!=amountOfLines-1:#If this is not the last line in the file
                             changeStageState(None,"Add")
+                        #print(len(self.tempStageArray))
                         lineCounter+=1
                     csvFile.close()
             except FileNotFoundError:
@@ -279,6 +292,7 @@ class graphFrame:
     figure=None
     x=None
     currentRocketStages=None
+    a0=None
 
     def getPlots(self,graphType,sepTimeQueue,stageList):
         xValues=list()
@@ -367,7 +381,7 @@ class graphFrame:
         sepTimeQueue=[]
         totalStageTime=0
         self.x=xPos
-        self.currentRocketStages=stagesList
+        self.currentRocketStages=list(stagesList)
      
         #Create the frame
         self.newFrame.place(x=self.x,y=0)
@@ -383,12 +397,12 @@ class graphFrame:
             totalStageTime+=self.currentRocketStages[stageitr].stageTime
 
        
-        stagesListCopy=list(self.currentRocketStages)
-        self.getPlots(str(graphType),sepTimeQueue,stagesListCopy)
+        #stagesListCopy=list(self.currentRocketStages)
+        self.getPlots(str(graphType),sepTimeQueue,self.currentRocketStages)
  
         returnButton=Button(self.newFrame,text="Return",fg ="#039be5 ",relief=FLAT,bg="#c9c9c9")
         returnButton.place(x=(width/2)-returnButton.winfo_reqwidth(),y=0)
-        returnButton.bind("<1>",lambda event:changeFrame(event,"Input",int(self.x>0),None,None))
+        returnButton.bind("<1>",lambda event:changeFrame(event,"Input",int(self.x>0),None,stagesList))
 
         saveButton=Button(self.newFrame,text="Save",fg ="#039be5 ",relief=FLAT,bg="#c9c9c9")
         saveButton.place(x=0,y=0)
@@ -419,7 +433,7 @@ def changeFrame(event,Type,sideNumber,graphtype,stageslist):
     if sideNumber!=0:
         xPos=width/2
     if Type=="Input":
-        sideFrames[sideNumber]=stageFrame(xPos)
+        sideFrames[sideNumber]=stageFrame(xPos,stageslist)
     else:
         sideFrames[sideNumber]=graphFrame(xPos,graphtype, stageslist)
 
@@ -439,8 +453,8 @@ def Destroyer(event,sideNumber):
 This is called to show input fields when the program runs.
 """
 def init():
-    changeFrame(None,"Input",0,None,None)
-    changeFrame(None,"Input",1,None,None)
+    changeFrame(None,"Input",0,None,[])
+    changeFrame(None,"Input",1,None,[])
 
 init()
 root.mainloop()
